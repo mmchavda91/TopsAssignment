@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog</title>
+</head>
+<body>
+    <h2 style="text-align:center;">Product Catalog</h2>
+
+<table style="width:90%; margin:auto; border:1px solid black; border-collapse:collapse; text-align:center;">
+  
+  <!-- Table Header -->
+  <thead>
+    <tr style="background-color:#f2f2f2;">
+      <th style="border:1px solid black; padding:10px;">Product Name</th>
+     <th style="border:1px solid black; padding:10px;">Product Image</th>
+      <th style="border:1px solid black; padding:10px;">Price</th>
+      <th style="border:1px solid black; padding:10px;">Description</th>
+      <th style="border:1px solid black; padding:10px;">Availability</th> 
+    </tr>
+  </thead>
+
+  <tbody>
+    <!-- Product 1 -->
+    <tr>
+      <td style="border:1px solid black; padding:10px;">Smartphone</td>
+      <td style="border:1px solid black; padding:10px;">
+      <img src="phone.jpg" style="width:200px; height:200px;" alt="Smartphone">
+      </td>
+     <td style="border:1px solid black; padding:10px;">₹15,000</td>
+      <td style="border:1px solid black; padding:10px;">
+        Android smartphone with 6GB RAM and 128GB storage.
+      </td>
+      <td style="border:1px solid black; padding:10px;">In Stock</td>
+    </tr> 
+     <!-- Product 2 -->
+    <tr>
+      <td style="border:1px solid black; padding:10px;">Laptop</td>
+      <td style="border:1px solid black; padding:10px;">
+        <img src="laptop.jpg" style="width:200px; height:200px;" alt="Laptop">
+      </td>
+      <td style="border:1px solid black; padding:10px;">₹55,000</td>
+      <td style="border:1px solid black; padding:10px;">
+        Lightweight laptop with 8GB RAM and SSD storage.
+      </td>
+      <td style="border:1px solid black; padding:10px;">In Stock</td>
+    </tr>
+
+    <!-- Product 3 (Using rowspan) -->
+    <tr>
+      <td style="border:1px solid black; padding:10px;" rowspan="2">Headphones</td>
+      <td style="border:1px solid black; padding:10px;">
+        <img src="headphone.jpg" style="width:200px; height:200px;" alt="Headphones">
+      </td>
+      <td style="border:1px solid black; padding:10px;">₹2,000</td>
+      <td style="border:1px solid black; padding:10px;" rowspan="2">
+        Noise-cancelling over-ear headphones with deep bass.
+      </td>
+      <td style="border:1px solid black; padding:10px;">In Stock</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid black; padding:10px;">
+        <img src="Headphone2_.jpg" style="width:200px; height:200px;" alt="Headphones Variant">
+      </td>
+      <td style="border:1px solid black; padding:10px;">₹2,200</td>
+      <td style="border:1px solid black; padding:10px;">Out of Stock</td>
+    </tr>
+
+    <!-- Product 4 (Using colspan) -->
+     <tr>
+      <td style="border:1px solid black; padding:10px;">Smartwatch</td>
+      <td style="border:1px solid black; padding:10px;">
+        <img src="watch.jpg" style="width:200px; height:200px;" alt="Smartwatch">
+      </td>
+      <td style="border:1px solid black; padding:10px;">₹5,000</td>
+      <td style="border:1px solid black; padding:10px;" colspan="2">
+        Fitness smartwatch with heart rate monitor. (Limited stock available)
+      </td>
+    </tr> 
+
+  </tbody>
+
+</table>
+</body>
+</html>

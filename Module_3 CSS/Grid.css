@@ -1,0 +1,45 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  padding: 20px;
+}
+
+/* Grid Container */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3x3 grid */
+  grid-gap: 20px; /* spacing between items */
+}
+
+/* Card Styling */
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 5px;
+  text-align: center;
+  
+}
+
+/* Image */
+.card img {
+  width:100%;
+  border-radius: 8px;
+}
+
+/* Title */
+.card h3 {
+  margin: 10px 0;
+  font-size: 18px;
+}
+
+/* Price */
+.price {
+  color: #27ae60;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Hover Effect */
+.card:hover {
+background-color: blue;
+}
