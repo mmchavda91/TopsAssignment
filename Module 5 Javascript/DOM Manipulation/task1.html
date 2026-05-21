@@ -1,0 +1,29 @@
+
+ <!-- Create an HTML page with a paragraph (<p>) that displays "Hello, World!".
+ Use JavaScript to:
+Change the text inside the paragraph to "JavaScript is fun!".
+Change the color of the paragraph to blue. -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM Example</title>
+</head>
+<body>
+    <p id="myPara">Hello, World!</p>
+
+  <script>
+    // Select the paragraph
+    let para = document.getElementById("myPara");
+
+    // Change text content
+    para.textContent = "JavaScript is fun!";
+
+    // Change text color
+    para.style.color = "purple";
+  </script>
+</body>
+</html>
