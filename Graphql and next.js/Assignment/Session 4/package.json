@@ -1,0 +1,15 @@
+{
+  "name": "session4-playlist-server",
+  "version": "1.0.0",
+  "description": "GraphQL Mutations Backend for Session 4 Playlist App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-graphql": "^0.12.0",
+    "graphql": "^15.10.3"
+  }
+}

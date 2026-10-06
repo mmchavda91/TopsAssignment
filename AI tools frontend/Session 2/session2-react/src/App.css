@@ -1,0 +1,317 @@
+/* ========== App Global Styles ========== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f5f5f7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== Tab Navigation ========== */
+.tab-nav {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tab-nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  overflow-x: auto;
+}
+
+.tab-brand {
+  color: #ffd700;
+  font-size: 16px;
+  font-weight: 800;
+  margin-right: 16px;
+  white-space: nowrap;
+  letter-spacing: -0.5px;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #a0a0b8;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.tab-active {
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  color: white !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.tab-emoji {
+  font-size: 15px;
+}
+
+/* ========== Tab Content ========== */
+.tab-content {
+  min-height: calc(100vh - 60px);
+}
+
+/* Section Headers */
+.section-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 24px;
+}
+
+.section-header h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin-bottom: 6px;
+}
+
+.section-header p {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.section-header p code {
+  background: #e8e8f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #764ba2;
+  font-weight: 600;
+}
+
+.section-header-dark h2 {
+  color: #f1f1f1;
+}
+
+.section-header-dark p {
+  color: #aaa;
+}
+
+.section-header-dark code {
+  background: #303030 !important;
+  color: #ff4444 !important;
+}
+
+/* ========== Q1 — Playlist Grid ========== */
+.section-q1 {
+  background: linear-gradient(180deg, #0d0d1a 0%, #1a1a2e 100%);
+  min-height: calc(100vh - 60px);
+  padding-bottom: 40px;
+}
+
+.section-q1 .section-header h2 {
+  color: #ffffff;
+}
+
+.section-q1 .section-header p {
+  color: #a0a0b8;
+}
+
+.playlist-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
+}
+
+/* ========== Q2 — Product Grid ========== */
+.section-q2 {
+  background: #f1f3f6;
+  min-height: calc(100vh - 60px);
+  padding-bottom: 40px;
+}
+
+.product-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* ========== Q3 — Zomato ========== */
+.section-q3 {
+  background: #ffffff;
+  min-height: calc(100vh - 60px);
+  padding-bottom: 40px;
+}
+
+/* ========== Q4 — YouTube ========== */
+.section-q4 {
+  background: #0f0f0f;
+  min-height: calc(100vh - 60px);
+  padding-bottom: 40px;
+}
+
+/* ========== Q5 — Review ========== */
+.section-q5 {
+  background: linear-gradient(180deg, #f5f5f7 0%, #e8e8f0 100%);
+  min-height: calc(100vh - 60px);
+  padding-bottom: 40px;
+}
+
+.review-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.review-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+}
+
+.review-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f5;
+}
+
+.review-item {
+  margin-bottom: 16px;
+}
+
+.review-item:last-child {
+  margin-bottom: 0;
+}
+
+.review-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.review-badge.fix {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+.review-item h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 4px;
+}
+
+.review-item p {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.review-item p code {
+  background: #f0f0f5;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #764ba2;
+  font-weight: 600;
+}
+
+.review-item pre {
+  margin-top: 8px;
+  background: #1a1a2e;
+  padding: 12px 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.review-item pre code {
+  background: none;
+  color: #a0d0ff;
+  font-size: 12px;
+  padding: 0;
+  white-space: pre;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .tab-nav-inner {
+    gap: 4px;
+    padding: 10px 12px;
+  }
+
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .tab-brand {
+    font-size: 14px;
+    margin-right: 8px;
+  }
+
+  .section-header {
+    padding: 24px 16px 16px;
+  }
+
+  .section-header h2 {
+    font-size: 22px;
+  }
+
+  .playlist-grid,
+  .product-grid {
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  .review-grid {
+    grid-template-columns: 1fr;
+    padding: 0 16px;
+  }
+}

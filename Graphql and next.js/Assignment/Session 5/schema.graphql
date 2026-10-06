@@ -1,0 +1,78 @@
+# ==============================================================
+# SESSION 5 - Q1 + Q2: GraphQL Schema Definition
+# File: schema.graphql
+# ==============================================================
+
+
+# --------------------------------------------------------------
+# Song Type (Q1)
+# Ek individual song ni details
+# --------------------------------------------------------------
+type Song {
+  id: ID!          # Unique identifier (! = required, cannot be null)
+  title: String!   # Song nu title (required)
+  artist: String!  # Song nu artist name (required)
+}
+
+
+# --------------------------------------------------------------
+# Playlist Type (Q1)
+# Ek playlist ma multiple songs hoi shake chhe
+# songs field Song objects ni list return kare chhe
+# --------------------------------------------------------------
+type Playlist {
+  id: ID!           # Unique identifier (required)
+  name: String!     # Playlist nu name (required)
+  songs: [Song]     # List of Song objects — each Song has title + artist
+}
+
+
+# --------------------------------------------------------------
+# Query Type (Q1 + Q2)
+#
+# Q2 FOCUS:
+#   playlist(id: ID!): Playlist
+#   → ID pass karo → Playlist return thase
+#   → Aa Playlist ni andar songs: [Song] hase
+#   → Drek Song ma title ane artist hase
+#
+# Client aa rīte query karase:
+#   query {
+#     playlist(id: "1") {   ← ID by which playlist fetch karvu
+#       id
+#       name
+#       songs {             ← nested — playlist ni badhi songs
+#         title             ← each song nu title
+#         artist            ← each song nu artist
+#       }
+#     }
+#   }
+# --------------------------------------------------------------
+type Query {
+
+  # Badhi playlists fetch karo (list)
+  playlists: [Playlist]
+
+  # ★ Q2: ID vade specific playlist fetch karo + teni badhi songs
+  #   id: ID!  → argument required chhe (! means mandatory)
+  #   Returns: Playlist object (with nested songs array)
+  playlist(id: ID!): Playlist
+
+  # Badha songs fetch karo
+  songs: [Song]
+
+  # ID vade specific song fetch karo
+  song(id: ID!): Song
+}
+
+
+# --------------------------------------------------------------
+# Mutation Type
+# Data "create / update / delete" mate
+# --------------------------------------------------------------
+type Mutation {
+  createPlaylist(name: String!): Playlist
+  addSongToPlaylist(playlistId: ID!, title: String!, artist: String!): Playlist
+  removeSongFromPlaylist(playlistId: ID!, songId: ID!): Playlist
+  deletePlaylist(id: ID!): Playlist
+}
