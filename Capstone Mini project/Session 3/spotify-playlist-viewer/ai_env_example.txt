@@ -1,0 +1,109 @@
+================================================
+Q5: ChatGPT AI-Generated .env.local Example
+================================================
+
+PROMPT USED:
+"Generate a secure .env.local example for a Next.js app that needs to
+connect to both the OpenAI API and Firebase. Include comments explaining
+each variable and mark which ones are public vs private."
+
+================================================
+CHATGPT RESPONSE — .env.local CONTENT:
+================================================
+
+# =============================================
+# .env.local — Next.js App Environment Variables
+# ⚠️ NEVER commit this file to GitHub or Git!
+# Add .env.local to your .gitignore file.
+# =============================================
+
+# ----------------------------
+# 🤖 OpenAI API Configuration
+# ----------------------------
+
+# Your secret OpenAI API key — Keep this PRIVATE (server-side only)
+# Get it from: https://platform.openai.com/account/api-keys
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# OpenAI Model to use (e.g., gpt-4, gpt-3.5-turbo)
+# This is safe to make public (NEXT_PUBLIC_ prefix)
+NEXT_PUBLIC_OPENAI_MODEL=gpt-4
+
+# OpenAI API Base URL (optional, use for custom endpoints)
+OPENAI_API_BASE_URL=https://api.openai.com/v1
+
+# ----------------------------
+# 🔥 Firebase Configuration
+# ----------------------------
+
+# Firebase Project API Key — Safe to expose (NEXT_PUBLIC_ prefix)
+# Get it from: Firebase Console > Project Settings > General > Your Apps
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+# Firebase Auth Domain
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-app.firebaseapp.com
+
+# Firebase Project ID
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-app-id
+
+# Firebase Storage Bucket
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-app.appspot.com
+
+# Firebase Messaging Sender ID
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
+
+# Firebase App ID
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abcdefghijklmnop
+
+# Firebase Measurement ID (Google Analytics — optional)
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
+
+# ----------------------------
+# 🔐 Firebase Admin SDK (Server-Side Only — PRIVATE)
+# ----------------------------
+
+# Firebase Service Account credentials (for server-side admin operations)
+# NEVER prefix these with NEXT_PUBLIC_
+FIREBASE_ADMIN_PROJECT_ID=your-app-id
+FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-app.iam.gserviceaccount.com
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nXXXXXXXX\n-----END PRIVATE KEY-----\n"
+
+# ----------------------------
+# 🌐 App Configuration
+# ----------------------------
+
+# Next.js App URL (used for callbacks, redirects)
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Node environment
+NODE_ENV=development
+
+================================================
+KEY SECURITY RULES (ChatGPT Suggested):
+================================================
+
+1. NEXT_PUBLIC_ prefix  = Safe for browser (client-side)
+   No prefix           = Server-side only (PRIVATE — never sent to browser)
+
+2. Add .env.local to .gitignore to prevent accidental commits
+
+3. Use .env.example file with placeholder values for team sharing
+
+4. Rotate API keys regularly on production
+
+5. Use Firebase App Check to prevent API abuse
+
+================================================
+.gitignore entry to add:
+================================================
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+================================================
+Assignment submitted for TOPS Technology — React Capstone Project, Session 3
+================================================
