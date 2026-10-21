@@ -1,0 +1,64 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Mamta Chavda",
+      "email": "seller@flipkart-hub.com",
+      "role": "Verified Seller Pro",
+      "membership": "Gold Member"
+    }
+  ],
+  "restaurants": [
+    {
+      "id": 1,
+      "name": "La Pino'z Pizza",
+      "cuisine": "Pizza, Fast Food",
+      "rating": 4.6,
+      "deliveryTime": "25 mins",
+      "priceForOne": 250,
+      "offer": "Flat ₹100 OFF with Pro"
+    },
+    {
+      "id": 2,
+      "name": "The Grand Thakar",
+      "cuisine": "Gujarati Thali, Kathiyawadi",
+      "rating": 4.8,
+      "deliveryTime": "35 mins",
+      "priceForOne": 400,
+      "offer": "FREE Delivery on orders > ₹199"
+    },
+    {
+      "id": 3,
+      "name": "Burger Farm",
+      "cuisine": "Burgers, Fries, Shakes",
+      "rating": 4.5,
+      "deliveryTime": "20 mins",
+      "priceForOne": 200,
+      "offer": "20% OFF with ICICI Cards"
+    }
+  ],
+  "recentOrders": [
+    {
+      "orderId": "ZOM-9921",
+      "restaurantName": "La Pino'z Pizza",
+      "items": ["7-Cheese Pizza", "Garlic Breadsticks"],
+      "amount": 489,
+      "status": "Delivered Yesterday"
+    },
+    {
+      "orderId": "ZOM-9922",
+      "restaurantName": "Gwalia Sweets",
+      "items": ["Special Gujarati Thali", "Gulab Jamun"],
+      "amount": 360,
+      "status": "Delivered on Sunday"
+    }
+  ],
+  "offers": [
+    {
+      "code": "ZOMATOPRO50",
+      "title": "FLAT 50% OFF",
+      "validity": "Valid on next 3 orders",
+      "discount": "50%"
+    }
+  ]
+}

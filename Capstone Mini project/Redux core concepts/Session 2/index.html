@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redux Core Concepts — Session 2: UI/UX Wireframing & Figma Design</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- React 18 & ReactDOM via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel for JSX compilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: rgba(22, 30, 49, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --cyan: #06b6d4;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #e23744;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top right, #1e1b4b, #090d16 45%, #050811);
+      color: var(--text-main);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0b1120; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    /* Glass Container */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      transition: all 0.25s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+    }
+    .badge-primary { background: rgba(99, 102, 241, 0.18); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+    .badge-cyan { background: rgba(6, 182, 212, 0.18); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-amber { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-rose { background: rgba(226, 55, 68, 0.18); color: #f87171; border: 1px solid rgba(226, 55, 68, 0.3); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      outline: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-secondary:hover {
+      background: #334155;
+      color: #fff;
+    }
+
+    /* Tabs */
+    .nav-tab {
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      background: transparent;
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .nav-tab:hover {
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-tab.active {
+      color: #ffffff;
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.96); }
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // ============================================================================
+    // HEADER
+    // ============================================================================
+    function Header({ activeTab, setActiveTab }) {
+      const tabs = [
+        { id: 'q1', label: 'Q1: Flipkart Lo-Fi', icon: '📐' },
+        { id: 'q2', label: 'Q2: Zomato Hi-Fi', icon: '🍕' },
+        { id: 'q3', label: 'Q3: Figma AI Job Profile', icon: '🤖' },
+        { id: 'q4', label: 'Q4: Spotify User Journey', icon: '🗺️' },
+        { id: 'q5', label: 'Q5: Layout Hierarchy', icon: '⚖️' },
+      ];
+
+      return (
+        <header style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(9, 13, 22, 0.88)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 50 }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px 24px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', boxShadow: '0 4px 12px rgba(236,72,153,0.4)' }}>
+                🎨
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h1 style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#f8fafc' }}>
+                    Redux Core Concepts
+                  </h1>
+                  <span className="badge badge-primary">Session 2</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '6px' }}>
+                    <div className="live-dot"></div>
+                    <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>Port 3002 Active</span>
+                  </div>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  UI/UX Wireframing, Figma High-Fidelity &amp; Layout Hierarchy Solutions
+                </p>
+              </div>
+            </div>
+
+            <nav style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        </header>
+      );
+    }
+
+    // ============================================================================
+    // Q1: FLIPKART LO-FI WIREFRAME
+    // ============================================================================
+    function QuestionOneWireframe() {
+      const [filterCategory, setFilterCategory] = useState('all');
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 1</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Flipkart-Style Homepage Low-Fidelity Wireframe</h2>
+              </div>
+              <span className="badge badge-cyan">Pen &amp; Paper / Digital Whiteboard Spec</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              Create a low-fidelity wireframe for a Flipkart-style homepage using pen and paper or any digital whiteboard tool. Include at least a top navigation bar, product grid, and a sidebar filter section. Focus on layout and placement, not colors or detailed images.
+            </p>
+          </div>
+
+          {/* Wireframe Display */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#38bdf8' }}>
+                📐 Rendered Vector Low-Fidelity Wireframe
+              </h3>
+              <a href="/Q1_flipkart_lofi_wireframe.svg" target="_blank" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
+                ↗ Open Full SVG
+              </a>
+            </div>
+            <div style={{ width: '100%', background: '#ffffff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #cbd5e1', padding: '10px' }}>
+              <img src="/Q1_flipkart_lofi_wireframe.svg" alt="Flipkart Lo-Fi Wireframe" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            </div>
+          </div>
+
+          {/* Component Hierarchy Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+            <div className="glass-card" style={{ padding: '20px' }}>
+              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>1. Top Navigation Bar</h4>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Houses brand logo, full-width search input with quick submit, Login button component, and shopping cart counter. Anchors global user actions.
+              </p>
+            </div>
+            <div className="glass-card" style={{ padding: '20px' }}>
+              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>2. Sidebar Filter Section</h4>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Fixed 240px width left panel with multi-faceted filtering: category tree, min/max price slider, brand checkboxes (Sony, boAt), and customer star ratings.
+              </p>
+            </div>
+            <div className="glass-card" style={{ padding: '20px' }}>
+              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>3. 3-Column Product Grid</h4>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Fluid product catalog showing image wireframe boxes (with diagonal X placeholders), product titles, star badges, price discounts, and high-contrast "ADD TO CART" CTAs.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // Q2: ZOMATO HI-FI DASHBOARD (With Working POST & GET from db.json)
+    // ============================================================================
+    function QuestionTwoZomato() {
+      const [reordered, setReordered] = useState(false);
+      const [restaurants, setRestaurants] = useState([
+        { id: 1, name: "La Pino'z Pizza", cuisine: "Pizza, Fast Food", rating: 4.6, deliveryTime: "25 mins", priceForOne: 250, offer: "Flat ₹100 OFF with Pro" },
+        { id: 2, name: "The Grand Thakar", cuisine: "Gujarati Thali, Kathiyawadi", rating: 4.8, deliveryTime: "35 mins", priceForOne: 400, offer: "FREE Delivery on orders > ₹199" },
+        { id: 3, name: "Burger Farm", cuisine: "Burgers, Fries, Shakes", rating: 4.5, deliveryTime: "20 mins", priceForOne: 200, offer: "20% OFF with ICICI Cards" }
+      ]);
+
+      const [name, setName] = useState('');
+      const [cuisine, setCuisine] = useState('');
+      const [rating, setRating] = useState('4.7');
+      const [price, setPrice] = useState('300');
+      const [postStatus, setPostStatus] = useState(null);
+      const [isSubmitting, setIsSubmitting] = useState(false);
+
+      // Load live from http://localhost:5000/restaurants if server is running
+      const fetchFromLocalServer = async () => {
+        try {
+          const res = await fetch('http://localhost:5000/restaurants');
+          if (res.ok) {
+            const data = await res.json();
+            setRestaurants(data);
+          }
+        } catch (e) {
+          // If port 5000 is not started, we still have the default items
+        }
+      };
+
+      React.useEffect(() => {
+        fetchFromLocalServer();
+      }, []);
+
+      const handleAddRestaurant = async (e) => {
+        e.preventDefault();
+        if (!name.trim()) return;
+
+        setIsSubmitting(true);
+        setPostStatus(null);
+
+        const newRestaurant = {
+          id: Date.now(),
+          name: name,
+          cuisine: cuisine || "Multi-Cuisine, Street Food",
+          rating: parseFloat(rating),
+          deliveryTime: "20-30 mins",
+          priceForOne: parseInt(price) || 250,
+          offer: "Special Discount 15% OFF"
+        };
+
+        try {
+          // Try to POST to JSON server if running on port 5000
+          const res = await fetch('http://localhost:5000/restaurants', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newRestaurant)
+          });
+
+          if (res.ok) {
+            const savedItem = await res.json();
+            setRestaurants(prev => [...prev, savedItem]);
+            setPostStatus('✅ સફળતાપૂર્વક db.json (Port 5000) માં સેવ થઈ ગયું!');
+          } else {
+            // Local state fallback
+            setRestaurants(prev => [...prev, newRestaurant]);
+            setPostStatus('✅ રેસ્ટોરન્ટ ઉમેરાઈ ગઈ (Local State)!');
+          }
+        } catch (err) {
+          // Fallback if port 5000 is not running
+          setRestaurants(prev => [...prev, newRestaurant]);
+          setPostStatus('✅ રેસ્ટોરન્ટ ઉમેરાઈ ગઈ (Local State - JSON Server offline)!');
+        } finally {
+          setIsSubmitting(false);
+          setName('');
+          setCuisine('');
+        }
+      };
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 2</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Zomato-Style High-Fidelity Dashboard in Figma</h2>
+              </div>
+              <span className="badge badge-rose">Figma Design System + Live POST Form</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              Open Figma and design a high-fidelity wireframe for a Zomato-style dashboard where users can see their recent orders, saved restaurants, and offers. Use Figma's built-in components for buttons, cards, and navigation.
+            </p>
+          </div>
+
+          {/* SVG Preview */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#e23744' }}>
+                🍕 Figma High-Fidelity Design Canvas Preview
+              </h3>
+              <a href="/Q2_zomato_hifi_dashboard.svg" target="_blank" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
+                ↗ Open Full SVG
+              </a>
+            </div>
+            <div style={{ width: '100%', background: '#f4f5f7', borderRadius: '12px', overflow: 'hidden', border: '1px solid #cbd5e1', padding: '10px' }}>
+              <img src="/Q2_zomato_hifi_dashboard.svg" alt="Zomato Dashboard Wireframe" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            </div>
+          </div>
+
+          {/* LIVE RESTAURANT CARDS & ADD FORM */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🍽️ Live Restaurants in Database ({restaurants.length})
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  આ લિસ્ટ સીધું <code>db.json</code> અથવા લોકલ સ્ટેટમાંથી લાઈવ રેન્ડર થાય છે:
+                </p>
+              </div>
+              <button className="btn btn-secondary" style={{ fontSize: '0.75rem' }} onClick={fetchFromLocalServer}>
+                🔄 Re-fetch from Port 5000
+              </button>
+            </div>
+
+            {/* Restaurant Cards Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginBottom: '24px' }}>
+              {restaurants.map((r, i) => (
+                <div key={r.id || i} style={{ background: '#0f172a', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '20px' }}>🍛</span>
+                    <span className="badge badge-emerald">{r.rating} ★</span>
+                  </div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>{r.name}</h4>
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '8px' }}>{r.cuisine}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '8px', fontSize: '0.75rem' }}>
+                    <span style={{ color: '#cbd5e1' }}>₹{r.priceForOne} for one</span>
+                    <span style={{ color: '#f87171', fontWeight: 600 }}>{r.offer}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* LIVE POST FORM: ADD RESTAURANT */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.9)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(226, 55, 68, 0.3)' }}>
+              <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f87171', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ➕ Add New Restaurant Form (POST to db.json)
+              </h4>
+              <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: '16px' }}>
+                અહીં વિગતો ભરીને બટન દબાવશો એટલે નવો ડેટા <code>POST</code> રિક્વેસ્ટ દ્વારા ઉમેરાઈ જશે:
+              </p>
+
+              <form onSubmit={handleAddRestaurant} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', alignItems: 'flex-end' }}>
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>Restaurant Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Honest Restaurant"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>Cuisine / Food Type</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Pav Bhaji, South Indian"
+                    value={cuisine}
+                    onChange={e => setCuisine(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>Rating (★)</label>
+                  <select
+                    value={rating}
+                    onChange={e => setRating(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                  >
+                    <option value="5.0">5.0 ★ (Outstanding)</option>
+                    <option value="4.8">4.8 ★ (Superb)</option>
+                    <option value="4.6">4.6 ★ (Very Good)</option>
+                    <option value="4.3">4.3 ★ (Good)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>Price for one (₹)</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 250"
+                    value={price}
+                    onChange={e => setPrice(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', background: '#020617', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ background: '#e23744', height: '38px', padding: '0 18px', whiteSpace: 'nowrap' }}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Adding...' : '➕ Add to db.json'}
+                </button>
+              </form>
+
+              {postStatus && (
+                <div style={{ marginTop: '12px', padding: '10px 14px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontSize: '0.85rem', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                  {postStatus}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Interactive Reorder Component Test */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc' }}>
+                  ⚡ Interactive Figma Button Component Demo: "🔁 Reorder"
+                </h4>
+                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                  Test how the Reorder button updates cart state and gives instant feedback:
+                </p>
+              </div>
+              <button
+                className="btn btn-primary"
+                style={{ background: '#e23744' }}
+                onClick={() => setReordered(!reordered)}
+              >
+                {reordered ? '✓ Added to Cart (2 Items)' : '🔁 Click to Reorder (La Pino\'z)'}
+              </button>
+            </div>
+            {reordered && (
+              <div style={{ marginTop: '14px', background: 'rgba(16, 185, 129, 0.1)', padding: '12px 16px', borderRadius: '10px', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34d399', fontSize: '0.85rem' }}>
+                ✓ 1x 7-Cheese Pizza and 1x Garlic Breadsticks added to cart! Total: ₹489.
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // Q3: FIGMA AI JOB PROFILE DASHBOARD
+    // ============================================================================
+    function QuestionThreeJob() {
+      const [showCustom, setShowCustom] = useState(true);
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 3</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Figma AI Job Profile Dashboard + Custom Additions</h2>
+              </div>
+              <span className="badge badge-emerald">Figma AI Generated + Edited</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              Use Figma AI to generate a layout for a job profile dashboard by typing: "Generate layout for job profile dashboard" in the Figma AI prompt. Edit the generated wireframe to add a section for user achievements and recent activity.
+            </p>
+          </div>
+
+          {/* SVG Preview */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#38bdf8' }}>
+                🤖 Figma AI Generated Layout + Edited Modules
+              </h3>
+              <a href="/Q3_job_profile_dashboard.svg" target="_blank" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
+                ↗ Open Full SVG
+              </a>
+            </div>
+            <div style={{ width: '100%', background: '#ffffff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #cbd5e1', padding: '10px' }}>
+              <img src="/Q3_job_profile_dashboard.svg" alt="Job Profile Dashboard Wireframe" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            </div>
+          </div>
+
+          {/* Custom Sections Breakdown */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+            <div className="glass-card" style={{ padding: '20px', border: '1px solid rgba(245, 158, 11, 0.4)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#fbbf24' }}>🏆 Custom Section 1: User Achievements</h4>
+                <span className="badge badge-amber">Edited</span>
+              </div>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                Added verified career milestones that recruiters look for: Capstone Project Rank #1 award, Certified Frontend Specialist certificate, and a 100-day verified GitHub commit streak.
+              </p>
+            </div>
+
+            <div className="glass-card" style={{ padding: '20px', border: '1px solid rgba(6, 182, 212, 0.4)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#38bdf8' }}>⚡ Custom Section 2: Recent Activity Timeline</h4>
+                <span className="badge badge-cyan">Edited</span>
+              </div>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                Provides an interactive chronological pipeline showing ongoing hiring progress: Interview Round 2 invitation (Tech Mahindra), machine coding test submission, and portfolio view counts.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // Q4: SPOTIFY USER JOURNEY
+    // ============================================================================
+    function QuestionFourJourney() {
+      const [activeStep, setActiveStep] = useState(1);
+
+      const journeySteps = [
+        {
+          step: 1,
+          name: "Screen 1: Welcome & Sign-Up",
+          desc: "Frictionless entry point collecting user email or 1-tap Google/Apple OAuth without forcing payment.",
+          purpose: "Minimizes bounce rate and creates secure authenticated session."
+        },
+        {
+          step: 2,
+          name: "Screen 2: Taste Onboarding",
+          desc: "Interactive chips allowing user to pick 3+ favorite artists/genres (Rock, Lo-Fi, Pop).",
+          purpose: "Eliminates the 'cold start' problem and builds immediate personalization vector."
+        },
+        {
+          step: 3,
+          name: "Screen 3: Personalized Home Feed",
+          desc: "Loads custom Daily Mixes, 'Made For You' playlists, and recommended albums based on chosen genres.",
+          purpose: "Delivers instant discovery gratification within 30 seconds of signup."
+        },
+        {
+          step: 4,
+          name: "Screen 4: Playlist Detail & Sticky Player",
+          desc: "Opens full song list and activates persistent audio playback controls (Seek-bar, Play/Pause, Favorite).",
+          purpose: "Enables core value consumption and music listening."
+        },
+      ];
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 4</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Spotify Playlist Dashboard: User Journey Mapping</h2>
+              </div>
+              <span className="badge badge-emerald">4-Screen Journey Architecture</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              Map out the user journey for a new user signing up and exploring a music playlist dashboard (like Spotify) on paper or Figma. Identify at least 4 key steps/screens the user will interact with and briefly describe the purpose of each.
+            </p>
+          </div>
+
+          {/* SVG Preview */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#1ed760' }}>
+                🗺️ Full Spotify User Journey Map &amp; Screen Transitions
+              </h3>
+              <a href="/Q4_spotify_user_journey.svg" target="_blank" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
+                ↗ Open Full SVG
+              </a>
+            </div>
+            <div style={{ width: '100%', background: '#121212', borderRadius: '12px', overflow: 'hidden', border: '1px solid #333333', padding: '10px' }}>
+              <img src="/Q4_spotify_user_journey.svg" alt="Spotify User Journey Map" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            </div>
+          </div>
+
+          {/* Interactive Stepper */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc', marginBottom: '14px' }}>
+              Interactive Step Exploration:
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+              {journeySteps.map(s => (
+                <button
+                  key={s.step}
+                  onClick={() => setActiveStep(s.step)}
+                  className={`btn ${activeStep === s.step ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ fontSize: '0.8rem', padding: '10px', textAlign: 'center' }}
+                >
+                  Step {s.step}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '18px', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+              <h5 style={{ fontSize: '1rem', fontWeight: 700, color: '#38bdf8', marginBottom: '6px' }}>
+                {journeySteps[activeStep - 1].name}
+              </h5>
+              <p style={{ fontSize: '0.86rem', color: '#cbd5e1', marginBottom: '8px' }}>
+                {journeySteps[activeStep - 1].desc}
+              </p>
+              <div style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>
+                🎯 Core UX Goal: {journeySteps[activeStep - 1].purpose}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // Q5: LAYOUT HIERARCHY ANALYSIS
+    // ============================================================================
+    function QuestionFiveHierarchy() {
+      const sentences = [
+        "In the Zomato dashboard wireframe, the primary visual focal point is the top promotional banner ('FLAT 50% OFF'), which commands immediate attention through its high-contrast warm gradient background and bold typography.",
+        "Directly beneath the banner, the 'Recent Orders & Quick Re-order' carousel carries the second highest visual weight because it uses vibrant food thumbnail photography and prominent red 'Reorder' action buttons to facilitate repeat purchases with minimal cognitive effort.",
+        "The 'Saved Restaurants' bookmark grid forms the third level in the hierarchy, structured with multi-column white cards, star-rating pills, and green delivery badges that guide the eye during exploratory dining browsing.",
+        "Supporting functional elements such as the top navigation bar, location selector, and search input maintain a clean, neutral background so they remain easily accessible without distracting from core food content.",
+        "Visual weight is systematically organized following the F-shaped scanning pattern, placing restaurant names and pricing on the left and primary CTA buttons on the bottom-right of each component.",
+        "Subtle drop shadows (0 4px 12px rgba(0,0,0,0.06)) and generous whitespace (20px gutters) delineate separate modules, preventing visual fatigue while ensuring clear spatial separation.",
+        "Consequently, the user's eye journey flows smoothly from initial awareness (discount banner) to instant repeat action (re-order card) and finally into exploratory browsing (saved restaurants)."
+      ];
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 5</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Layout Hierarchy &amp; Visual Weight Analysis</h2>
+              </div>
+              <span className="badge badge-amber">Strict 5–7 Sentence Requirement</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              Analyze your dashboard wireframe from task 2 or 3 and list the layout hierarchy: which sections are most prominent, which are secondary, and how visual weight guides the user's attention. Write your answer in 5-7 sentences.
+            </p>
+          </div>
+
+          {/* 7 Sentences Analysis Cards */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#10b981', marginBottom: '16px' }}>
+              📝 7-Sentence Architectural Hierarchy Breakdown:
+            </h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {sentences.map((sentence, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', padding: '12px 16px', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <span className="badge badge-primary" style={{ minWidth: '32px', justifyContent: 'center' }}>
+                    #{idx + 1}
+                  </span>
+                  <p style={{ fontSize: '0.88rem', color: '#cbd5e1', lineHeight: 1.6 }}>
+                    {sentence}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Visual Weight Heatmap Summary */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+            <div className="glass-card" style={{ padding: '20px', borderLeft: '4px solid #ef4444' }}>
+              <span className="badge badge-rose" style={{ marginBottom: '6px' }}>Primary Focal Point</span>
+              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>Promotional Offer Banner</h4>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Highest visual weight via high-contrast gradient, bold copy, and bright CTA.</p>
+            </div>
+            <div className="glass-card" style={{ padding: '20px', borderLeft: '4px solid #f59e0b' }}>
+              <span className="badge badge-amber" style={{ marginBottom: '6px' }}>Secondary Focal Point</span>
+              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>Recent Orders Carousel</h4>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>High actionability with thumbnail imagery and prominent 'Reorder' triggers.</p>
+            </div>
+            <div className="glass-card" style={{ padding: '20px', borderLeft: '4px solid #10b981' }}>
+              <span className="badge badge-emerald" style={{ marginBottom: '6px' }}>Tertiary / Supportive</span>
+              <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>Saved Restaurants &amp; Nav Bar</h4>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Neutral surface cards and top search input for structured, fatigue-free browsing.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // MAIN APP
+    // ============================================================================
+    function App() {
+      const [activeTab, setActiveTab] = useState('q1');
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+          
+          <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px', flex: 1, width: '100%' }}>
+            {activeTab === 'q1' && <QuestionOneWireframe />}
+            {activeTab === 'q2' && <QuestionTwoZomato />}
+            {activeTab === 'q3' && <QuestionThreeJob />}
+            {activeTab === 'q4' && <QuestionFourJourney />}
+            {activeTab === 'q5' && <QuestionFiveHierarchy />}
+          </main>
+
+          <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 24px', textAlign: 'center', color: '#64748b', fontSize: '0.8rem', background: 'rgba(9, 13, 22, 0.95)' }}>
+            TOPS Technology — Redux Core Concepts Capstone Session 2 • Running on Node HTTP Server (Port 3002)
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

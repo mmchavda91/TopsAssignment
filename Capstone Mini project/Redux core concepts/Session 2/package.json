@@ -1,0 +1,13 @@
+{
+  "name": "redux-core-concepts-session-2",
+  "version": "1.0.0",
+  "description": "Session 2: UI/UX Wireframing & Figma High-Fidelity Design Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["react", "redux", "wireframe", "figma", "session2"],
+  "author": "TOPS Technology Student",
+  "license": "ISC"
+}

@@ -1,0 +1,60 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Mamta Chavda",
+      "email": "seller@flipkart-hub.com",
+      "password": "password123",
+      "role": "Verified Seller Pro",
+      "token": "jwt_token_seller_pro_987654"
+    },
+    {
+      "id": 2,
+      "name": "Rahul Sharma",
+      "email": "rahul@reactdev.com",
+      "password": "password123",
+      "role": "Candidate",
+      "token": "jwt_token_candidate_123456"
+    }
+  ],
+  "products": [
+    {
+      "id": 101,
+      "name": "Wireless Noise Cancelling Headphones",
+      "category": "Electronics",
+      "price": 2499,
+      "stock": 4,
+      "status": "Low Stock"
+    },
+    {
+      "id": 102,
+      "name": "Mechanical Gaming Keyboard RGB",
+      "category": "Computer Accessories",
+      "price": 3899,
+      "stock": 25,
+      "status": "In Stock"
+    },
+    {
+      "id": 103,
+      "name": "Ultra-Fast USB-C Cable (65W)",
+      "category": "Cables",
+      "price": 349,
+      "stock": 2,
+      "status": "Critical Low"
+    }
+  ],
+  "orders": [
+    {
+      "orderId": "OD-2026-8812",
+      "customerName": "Pooja Patel",
+      "amount": 2848,
+      "status": "Pending Dispatch"
+    },
+    {
+      "orderId": "OD-2026-8813",
+      "customerName": "Amit Shah",
+      "amount": 3899,
+      "status": "Shipped"
+    }
+  ]
+}

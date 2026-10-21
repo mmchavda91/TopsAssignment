@@ -1,0 +1,13 @@
+{
+  "name": "redux-core-concepts-session-1",
+  "version": "1.0.0",
+  "description": "Session 1: Capstone Project Planning & Core Concepts Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["react", "redux", "capstone", "session1"],
+  "author": "TOPS Technology Student",
+  "license": "ISC"
+}

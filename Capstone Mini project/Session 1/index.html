@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redux Core Concepts — Session 1: Capstone Planning & Architecture</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- React 18 & ReactDOM via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel for JSX compilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: rgba(22, 30, 49, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --cyan: #06b6d4;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top right, #1e1b4b, #090d16 45%, #050811);
+      color: var(--text-main);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0b1120; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    /* Glass Container */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      transition: all 0.25s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+    }
+    .badge-primary { background: rgba(99, 102, 241, 0.18); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+    .badge-cyan { background: rgba(6, 182, 212, 0.18); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .badge-emerald { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-amber { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-rose { background: rgba(244, 63, 94, 0.18); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+    /* Button styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      outline: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-secondary:hover {
+      background: #334155;
+      color: #fff;
+    }
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.2);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.35);
+      color: #fff;
+    }
+
+    /* Tabs */
+    .nav-tab {
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      background: transparent;
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .nav-tab:hover {
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-tab.active {
+      color: #ffffff;
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Keyframes */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.96); }
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ============================================================================
+    // HEADER COMPONENT (With Real Interactive Login / Logout)
+    // ============================================================================
+    function Header({ activeTab, setActiveTab, currentUser, onOpenLogin, onLogout }) {
+      const tabs = [
+        { id: 'q1', label: 'Q1: Daily App Scope', icon: '🌐' },
+        { id: 'q2', label: 'Q2: E-Com Dashboard', icon: '📊' },
+        { id: 'q3', label: 'Q3: AI Resume Builder', icon: '🤖' },
+        { id: 'q4', label: 'Q4: Flow Diagram', icon: '🔄' },
+        { id: 'q5', label: 'Q5: Capstone Choice', icon: '🏆' },
+        { id: 'api', label: '⚡ Live API & Auth Demo', icon: '🚀' },
+      ];
+
+      return (
+        <header style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(9, 13, 22, 0.88)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 50 }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px 24px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', boxShadow: '0 4px 12px rgba(99,102,241,0.4)' }}>
+                ⚛️
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h1 style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#f8fafc' }}>
+                    Redux Core Concepts
+                  </h1>
+                  <span className="badge badge-primary">Session 1</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '6px' }}>
+                    <div className="live-dot"></div>
+                    <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>Port 3001 Active</span>
+                  </div>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Interactive Capstone Architecture &amp; Assignment Solutions
+                </p>
+              </div>
+            </div>
+
+            {/* Auth Button in Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {currentUser ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(15, 23, 42, 0.8)', padding: '6px 12px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 'bold' }}>
+                    {currentUser.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc' }}>{currentUser.name}</div>
+                    <div style={{ fontSize: '0.68rem', color: '#34d399' }}>● {currentUser.role}</div>
+                  </div>
+                  <button className="btn btn-danger" style={{ padding: '4px 10px', fontSize: '0.75rem', marginLeft: '4px' }} onClick={onLogout}>
+                    🔒 Logout
+                  </button>
+                </div>
+              ) : (
+                <button className="btn btn-primary" onClick={onOpenLogin}>
+                  🔐 Login / Sign In
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px 12px', display: 'flex', gap: '6px', overflowX: 'auto' }}>
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </header>
+      );
+    }
+
+    // ============================================================================
+    // LOGIN MODAL COMPONENT
+    // ============================================================================
+    function LoginModal({ isOpen, onClose, onLoginSuccess }) {
+      const [email, setEmail] = useState('seller@flipkart-hub.com');
+      const [password, setPassword] = useState('password123');
+      const [role, setRole] = useState('E-Commerce Seller');
+
+      if (!isOpen) return null;
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        onLoginSuccess({
+          name: email.split('@')[0],
+          email: email,
+          role: role,
+          token: "jwt_mock_token_" + Math.random().toString(36).substring(2),
+          loginAt: new Date().toLocaleTimeString()
+        });
+        onClose();
+      };
+
+      const handleQuickDemo = (userRole) => {
+        const demoUser = userRole === 'seller' ? {
+          name: "Mamta (Seller Admin)",
+          email: "mamta.seller@ecommerce.com",
+          role: "Verified Seller Pro",
+          token: "jwt_demo_seller_987654321",
+          loginAt: new Date().toLocaleTimeString()
+        } : {
+          name: "Mamta (Job Seeker)",
+          email: "mamta.dev@reactcareer.com",
+          role: "Candidate / Developer",
+          token: "jwt_demo_resume_123456789",
+          loginAt: new Date().toLocaleTimeString()
+        };
+        onLoginSuccess(demoUser);
+        onClose();
+      };
+
+      return (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="glass-card" style={{ maxWidth: '440px', width: '100%', padding: '28px', background: '#0f172a', border: '1px solid rgba(99, 102, 241, 0.4)', boxShadow: '0 20px 50px rgba(0,0,0,0.8)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '24px' }}>🔐</span>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>User Authentication</h3>
+              </div>
+              <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+            </div>
+
+            <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+              Simulates Redux <code style={{ color: '#818cf8' }}>authSlice.actions.loginSuccess()</code> and saves session token:
+            </p>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', background: 'rgba(2, 6, 23, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', background: 'rgba(2, 6, 23, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Role</label>
+                <select
+                  value={role}
+                  onChange={e => setRole(e.target.value)}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', background: 'rgba(2, 6, 23, 0.8)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
+                >
+                  <option value="E-Commerce Seller">E-Commerce Seller (Flipkart Panel)</option>
+                  <option value="Candidate">AI Resume Candidate</option>
+                  <option value="Music Curator">Music Curator (SoundPulse)</option>
+                </select>
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', marginTop: '6px' }}>
+                🚀 Log In &amp; Update Redux State
+              </button>
+            </form>
+
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', marginBottom: '10px' }}>Or 1-Click Instant Demo Login:</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '8px' }} onClick={() => handleQuickDemo('seller')}>
+                  ⚡ As Seller Admin
+                </button>
+                <button className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '8px' }} onClick={() => handleQuickDemo('candidate')}>
+                  ⚡ As Candidate
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // TAB: LIVE API & AUTH DEMO (How to check API & Login/Logout)
+    // ============================================================================
+    function LiveApiAndAuthDemo({ currentUser, onOpenLogin, onLogout }) {
+      const [apiEndpoint, setApiEndpoint] = useState('products');
+      const [apiData, setApiData] = useState(null);
+      const [isLoading, setIsLoading] = useState(false);
+      const [httpStatus, setHttpStatus] = useState(null);
+      const [errorMsg, setErrorMsg] = useState(null);
+
+      const fetchLiveApi = async (endpoint) => {
+        setIsLoading(true);
+        setErrorMsg(null);
+        setHttpStatus('Pending...');
+        
+        const urlMap = {
+          dbjson: '/db.json',
+          products: 'https://dummyjson.com/products?limit=3',
+          users: 'https://dummyjson.com/users?limit=3',
+          quotes: 'https://dummyjson.com/quotes?limit=3'
+        };
+
+        const targetUrl = urlMap[endpoint];
+
+        try {
+          console.log(`[API Request Started] Fetching: ${targetUrl}`);
+          const res = await fetch(targetUrl);
+          setHttpStatus(`${res.status} ${res.statusText}`);
+          const json = await res.json();
+          console.log(`[API Response Received]:`, json);
+          setApiData(json);
+        } catch (err) {
+          console.error(`[API Fetch Error]:`, err);
+          setErrorMsg(err.message);
+          setHttpStatus('500 Network Error');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      useEffect(() => {
+        fetchLiveApi(apiEndpoint);
+      }, [apiEndpoint]);
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Header Card */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-emerald" style={{ marginBottom: '8px' }}>PRACTICAL GUIDE</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Login, Logout &amp; Live API Data Verification</h2>
+              </div>
+              <span className="badge badge-cyan">Redux State + Network DevTools</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              આ સેક્શનમાં જુઓ કે React અને Redux માં <strong>Login / Logout</strong> સ્ટેટ કેવી રીતે કામ કરે છે, અને <strong>API કોલ કરીને બ્રાઉઝરમાં ડેટા કેવી રીતે ચેક થાય છે</strong>.
+            </p>
+          </div>
+
+          {/* PART 1: AUTHENTICATION STATE */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#818cf8', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🔐 Part 1: Login &amp; Logout State (Redux authSlice)
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  કેવી રીતે યુઝર ઓથેન્ટિકેટ થાય છે અને લોગઆઉટ કરવાથી સ્ટેટ ખાલી થાય છે:
+                </p>
+              </div>
+              {currentUser ? (
+                <button className="btn btn-danger" onClick={onLogout}>🔒 Click to Logout</button>
+              ) : (
+                <button className="btn btn-primary" onClick={onOpenLogin}>🔐 Click to Login</button>
+              )}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+              {/* Visual Card */}
+              <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '8px' }}>વર્તમાન યુઝર સ્ટેટસ:</div>
+                {currentUser ? (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 'bold' }}>
+                        {currentUser.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 700, color: '#f8fafc' }}>{currentUser.name}</div>
+                        <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>{currentUser.email}</div>
+                      </div>
+                    </div>
+                    <span className="badge badge-emerald">Status: Authenticated (Logged In)</span>
+                    <div style={{ marginTop: '10px', fontSize: '0.75rem', color: '#cbd5e1' }}>
+                      <strong>Login Time:</strong> {currentUser.loginAt}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>👤</div>
+                    <span className="badge badge-rose">Status: Guest / Logged Out</span>
+                    <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '8px' }}>
+                      કોઈ યુઝર લોગિન નથી. ઉપરના <strong>"Click to Login"</strong> બટન પર ક્લિક કરો.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Redux State Object Preview */}
+              <div style={{ background: '#020617', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize: '0.75rem', color: '#38bdf8', fontFamily: 'JetBrains Mono', marginBottom: '6px' }}>
+                  // Redux Store: state.auth
+                </div>
+                <pre style={{ fontSize: '0.75rem', color: '#a5b4fc', lineHeight: 1.5, overflowX: 'auto' }}>
+{JSON.stringify({
+  isAuthenticated: !!currentUser,
+  user: currentUser ? {
+    name: currentUser.name,
+    email: currentUser.email,
+    role: currentUser.role
+  } : null,
+  token: currentUser ? currentUser.token : null,
+  status: currentUser ? 'succeeded' : 'idle'
+}, null, 2)}
+                </pre>
+              </div>
+            </div>
+          </div>
+
+          {/* PART 2: LIVE API DATA FETCHER */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#06b6d4', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🌐 Part 2: Real API Live Fetcher &amp; Verification
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  નીચેના બટન પર ક્લિક કરીને લાઈવ API કોલ કરો અને રિસ્પોન્સ ચેક કરો:
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <select
+                  value={apiEndpoint}
+                  onChange={e => setApiEndpoint(e.target.value)}
+                  style={{ padding: '8px 12px', borderRadius: '10px', background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                >
+                  <option value="dbjson">📂 Local db.json (Mock DB)</option>
+                  <option value="products">📦 Products API</option>
+                  <option value="users">👥 Users API</option>
+                  <option value="quotes">💬 Quotes API</option>
+                </select>
+
+                <button
+                  className="btn btn-primary"
+                  onClick={() => fetchLiveApi(apiEndpoint)}
+                  disabled={isLoading}
+                  style={{ padding: '8px 14px', fontSize: '0.8rem' }}
+                >
+                  {isLoading ? '⏳ Fetching...' : '🔄 Re-fetch API'}
+                </button>
+              </div>
+            </div>
+
+            {/* Status Bar */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '10px 16px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', fontSize: '0.82rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div>
+                <span style={{ color: '#94a3b8' }}>Endpoint: </span>
+                <code style={{ color: '#38bdf8' }}>https://dummyjson.com/{apiEndpoint}?limit=3</code>
+              </div>
+              <div>
+                <span style={{ color: '#94a3b8' }}>HTTP Status: </span>
+                <span className={`badge ${httpStatus && httpStatus.includes('200') ? 'badge-emerald' : 'badge-amber'}`}>
+                  {httpStatus || 'Idle'}
+                </span>
+              </div>
+            </div>
+
+            {/* Rendered API Data Cards */}
+            {isLoading ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                <div style={{ fontSize: '30px', animation: 'pulse 1s infinite' }}>⏳</div>
+                <div style={{ marginTop: '8px', fontWeight: 600 }}>Loading API data from server...</div>
+              </div>
+            ) : apiData ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginBottom: '16px' }}>
+                {apiEndpoint === 'dbjson' && apiData && apiData.products && apiData.products.map(p => (
+                  <div key={p.id} style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span className="badge badge-emerald">db.json item</span>
+                      <span className="badge badge-amber">Stock: {p.stock}</span>
+                    </div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>{p.name}</div>
+                    <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '8px' }}>Category: {p.category}</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 800, color: '#10b981' }}>₹{p.price}</div>
+                  </div>
+                ))}
+
+                {apiEndpoint === 'products' && apiData && apiData.products && apiData.products.map(p => (
+                  <div key={p.id} style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>{p.title}</div>
+                    <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '8px' }}>Category: {p.category}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#10b981' }}>${p.price}</span>
+                      <span className="badge badge-amber">{p.rating} ★</span>
+                    </div>
+                  </div>
+                ))}
+
+                {apiEndpoint === 'users' && apiData.users && apiData.users.map(u => (
+                  <div key={u.id} style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>{u.firstName} {u.lastName}</div>
+                    <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '8px' }}>Email: {u.email}</div>
+                    <span className="badge badge-primary">{u.company?.title || 'Engineer'}</span>
+                  </div>
+                ))}
+
+                {apiEndpoint === 'quotes' && apiData.quotes && apiData.quotes.map(q => (
+                  <div key={q.id} style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: '0.82rem', fontStyle: 'italic', color: '#cbd5e1', marginBottom: '8px' }}>"{q.quote}"</div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#38bdf8' }}>— {q.author}</div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {/* Raw JSON Accordion */}
+            <details style={{ background: '#020617', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <summary style={{ cursor: 'pointer', color: '#818cf8', fontSize: '0.8rem', fontWeight: 600 }}>
+                🔍 Click to Inspect Full Raw JSON Response
+              </summary>
+              <pre style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: '10px', maxHeight: '180px', overflowY: 'auto' }}>
+{JSON.stringify(apiData, null, 2)}
+              </pre>
+            </details>
+          </div>
+
+          {/* STEP BY STEP DEVTOOLS GUIDE */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f59e0b', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🛠️ બ્રાઉઝરમાં API અને Redux Data ચેક કરવાની 3 સૌથી સરળ રીતો
+            </h3>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+              {/* DevTools Network Tab */}
+              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '20px' }}>📡</span>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f8fafc' }}>
+                    1. Network Tab (સૌથી મહત્વનું)
+                  </h4>
+                </div>
+                <ol style={{ fontSize: '0.82rem', color: '#cbd5e1', paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <li>કીબોર્ડ પર <strong>F12</strong> અથવા <strong>Ctrl + Shift + I</strong> દબાવો.</li>
+                  <li>ઉપર <strong>Network</strong> ટેબ પર ક્લિક કરો.</li>
+                  <li>ફિલ્ટરમાં <strong>Fetch/XHR</strong> પસંદ કરો.</li>
+                  <li>તમે પેજ રીફ્રેશ કરશો કે બટન દબાવશો એટલે API નું નામ દેખાશે (દા.ત. <code>products?limit=3</code>).</li>
+                  <li>તેના પર ક્લિક કરીને <strong>Headers</strong> (Status 200 OK), <strong>Preview</strong> અને <strong>Response</strong> જોઈ શકો છો.</li>
+                </ol>
+              </div>
+
+              {/* DevTools Console Tab */}
+              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '20px' }}>💻</span>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f8fafc' }}>
+                    2. Console Tab
+                  </h4>
+                </div>
+                <ol style={{ fontSize: '0.82rem', color: '#cbd5e1', paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <li><strong>F12</strong> દબાવીને <strong>Console</strong> ટેબ ખોલો.</li>
+                  <li>કોડમાં જ્યારે પણ <code>console.log(data)</code> લખેલું હોય, ત્યારે આખો ડેટા ઓબ્જેક્ટ ત્યાં પ્રિન્ટ થયેલો દેખાશે.</li>
+                  <li>તમે ડેટા પર ક્લિક કરીને તેની અંદરની એરે (Array) અને કીઝ (Keys) ખોલીને ચેક કરી શકો છો.</li>
+                </ol>
+              </div>
+
+              {/* Application / LocalStorage */}
+              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '20px' }}>💾</span>
+                  <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f8fafc' }}>
+                    3. Local Storage (Auth Token)
+                  </h4>
+                </div>
+                <ol style={{ fontSize: '0.82rem', color: '#cbd5e1', paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <li><strong>F12</strong> દબાવીને <strong>Application</strong> ટેબ પર જાઓ.</li>
+                  <li>ડાબી બાજુ <strong>Storage</strong> ની નીચે <strong>Local Storage</strong> ખોલો.</li>
+                  <li>ત્યાં <code>token</code> કે <code>user_session</code> સેવ થયેલું હોય તે જોવા મળે છે, જેથી પેજ રીફ્રેશ થાય તો પણ લોગઆઉટ ન થવાય.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // Q1: DAILY APP PROJECT SCOPE STATEMENT (SPOTIFY / SOUNDPULSE)
+    // ============================================================================
+    function QuestionOneScope() {
+      const [selectedMood, setSelectedMood] = useState('focus');
+
+      const moodPlaylists = {
+        focus: [
+          { title: "Deep Work Lo-Fi Beats", artist: "ChilledCow Ensemble", bpm: "84 BPM", duration: "3:12" },
+          { title: "Coding Synth Flow", artist: "Syntax Wave", bpm: "110 BPM", duration: "4:05" },
+          { title: "Ambient Alpha Waves", artist: "NeuroSound Labs", bpm: "60 BPM", duration: "5:20" },
+        ],
+        gym: [
+          { title: "Hyperdrive Hardstyle", artist: "Iron Beast", bpm: "150 BPM", duration: "3:45" },
+          { title: "Adrenaline Surge", artist: "Bass Velocity", bpm: "142 BPM", duration: "2:58" },
+          { title: "Heavy Deadlift Anthem", artist: "Viking Core", bpm: "138 BPM", duration: "3:30" },
+        ],
+        chill: [
+          { title: "Sunday Sunset Acoustic", artist: "Coastal Breeze", bpm: "76 BPM", duration: "3:18" },
+          { title: "Rainy Cafe Piano", artist: "Velvet Keys", bpm: "68 BPM", duration: "4:12" },
+          { title: "Midnight Starlight", artist: "Luna Horizon", bpm: "80 BPM", duration: "3:50" },
+        ],
+      };
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Header Card */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 1</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Daily App Pick &amp; Project Scope Statement</h2>
+              </div>
+              <span className="badge badge-emerald">Selected App: Spotify Clone (SoundPulse)</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              Pick any app you use daily (like Zomato, Instagram, Flipkart, or Spotify) and write a short project scope statement describing what problem your React app version would solve and who the main users would be.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+            {/* Scope Statement Box */}
+            <div className="glass-card" style={{ padding: '24px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px', color: '#818cf8', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                📋 Project Scope Statement
+              </h3>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.88rem' }}>
+                <div>
+                  <strong style={{ color: '#f8fafc' }}>🎯 App Name:</strong>
+                  <p style={{ color: 'var(--text-muted)', marginTop: '2px' }}>SoundPulse — AI-Driven Personalized Music Hub</p>
+                </div>
+                <div>
+                  <strong style={{ color: '#f8fafc' }}>🚨 Core Problem Solved:</strong>
+                  <p style={{ color: 'var(--text-muted)', marginTop: '2px' }}>
+                    Users face "choice overload" on standard Spotify. Finding tracks tailored to precise mental states (deep study focus, heavy lifting, winding down) takes too much time and browsing.
+                  </p>
+                </div>
+                <div>
+                  <strong style={{ color: '#f8fafc' }}>💡 React Solution:</strong>
+                  <p style={{ color: 'var(--text-muted)', marginTop: '2px' }}>
+                    A lightweight single-page React app with real-time mood-to-track filtering, customized audio queue controls, and normalized Redux store caching recent favorites without clutter.
+                  </p>
+                </div>
+                <div>
+                  <strong style={{ color: '#f8fafc' }}>👥 Primary Target Audience:</strong>
+                  <ul style={{ color: 'var(--text-muted)', paddingLeft: '18px', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Software Engineers &amp; Students wanting 1-click focus sessions</li>
+                    <li>Gymgoers &amp; Runners needing high-BPM rhythm pacing</li>
+                    <li>Casual commuters seeking mood-aligned background tunes</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Interactive Demo Simulator */}
+            <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🎵 Live Mood Generator Demo
+                </h3>
+                <span className="badge badge-cyan">Interactive React State</span>
+              </div>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
+                Click a mood tag below to trigger instant playlist recommendations:
+              </p>
+
+              {/* Mood Buttons */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                {['focus', 'gym', 'chill'].map(mood => (
+                  <button
+                    key={mood}
+                    className={`btn ${selectedMood === mood ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ textTransform: 'capitalize', fontSize: '0.8rem', padding: '6px 14px' }}
+                    onClick={() => setSelectedMood(mood)}
+                  >
+                    {mood === 'focus' ? '🧠 Focus / Coding' : mood === 'gym' ? '🔥 Heavy Gym' : '☕ Chill & Relax'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Track list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                {moodPlaylists[selectedMood].map((track, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '14px', color: '#6366f1', fontWeight: 'bold' }}>0{idx + 1}</span>
+                      <div>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#f8fafc' }}>{track.title}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{track.artist}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span className="badge badge-amber" style={{ fontSize: '0.7rem' }}>{track.bpm}</span>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{track.duration}</span>
+                      <button className="btn btn-secondary" style={{ padding: '4px 8px', fontSize: '12px' }}>▶ Play</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // Q2: SMART E-COMMERCE DASHBOARD (FLIPKART SELLER PANEL)
+    // ============================================================================
+    function QuestionTwoDashboard() {
+      const [inventory, setInventory] = useState([
+        { id: 1, name: "Wireless ANC Headphones", sku: "W-HEAD-01", stock: 4, minThreshold: 10, price: "₹2,499", status: "Critical Low" },
+        { id: 2, name: "Ergonomic Mechanical Keyboard", sku: "KB-MECH-RGB", stock: 18, minThreshold: 8, price: "₹3,899", status: "In Stock" },
+        { id: 3, name: "USB-C Fast Charging Cable (2M)", sku: "CB-USBC-60W", stock: 2, minThreshold: 15, price: "₹349", status: "Critical Low" },
+        { id: 4, name: "Smart Fitness Tracker Band", sku: "FT-PRO-V2", stock: 34, minThreshold: 10, price: "₹1,799", status: "In Stock" },
+      ]);
+
+      const [restocked, setRestocked] = useState({});
+
+      const handleRestock = (id) => {
+        setInventory(prev => prev.map(item => item.id === id ? { ...item, stock: item.stock + 20, status: "In Stock" } : item));
+        setRestocked({ ...restocked, [id]: true });
+      };
+
+      const features = [
+        {
+          num: 1,
+          icon: "📈",
+          title: "Real-Time Sales & Revenue Analytics",
+          helps: "Helps sellers track live daily/monthly sales volume, profit margins, and growth trends at a glance to make fast business decisions.",
+          metric: "₹1,48,250 Today (+18.4%)"
+        },
+        {
+          num: 2,
+          icon: "📦",
+          title: "Smart Inventory & Low-Stock Alerts",
+          helps: "Helps sellers automatically monitor stock levels and receive instant notifications before popular items run out to prevent lost sales.",
+          metric: "2 SKUs Below Threshold"
+        },
+        {
+          num: 3,
+          icon: "📑",
+          title: "Product Catalog & Bulk Listing Manager",
+          helps: "Helps sellers add, edit, categorize, and bulk-update product listings, prices, and variants quickly without tedious manual data entry.",
+          metric: "148 Active Listings"
+        },
+        {
+          num: 4,
+          icon: "🚚",
+          title: "Order Management & Fulfillment Tracking",
+          helps: "Helps sellers process incoming orders, generate shipping labels, and update dispatch statuses seamlessly in one centralized workflow.",
+          metric: "32 Orders Pending Dispatch"
+        },
+        {
+          num: 5,
+          icon: "💬",
+          title: "Customer Feedback & Sentiment Analysis",
+          helps: "Helps sellers identify customer satisfaction trends, product defects, or common complaints quickly to improve product quality and seller ratings.",
+          metric: "4.7★ (94% Positive)"
+        },
+      ];
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Header Card */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 2</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Smart E-Commerce Dashboard — 5 Core Features</h2>
+              </div>
+              <span className="badge badge-cyan">Flipkart Seller Panel Simulator</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              List 5 core features you would include if you were building a Smart E-Commerce Dashboard in React, and explain in one line how each feature helps the user.
+            </p>
+          </div>
+
+          {/* 5 Features Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+            {features.map(f => (
+              <div key={f.num} className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '24px' }}>{f.icon}</span>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>{f.title}</h4>
+                    </div>
+                    <span className="badge badge-primary">#{f.num}</span>
+                  </div>
+                  <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: 1.5 }}>
+                    <strong style={{ color: '#e2e8f0' }}>How it helps:</strong> {f.helps}
+                  </p>
+                </div>
+                <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Live Metric Demo:</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#38bdf8' }}>{f.metric}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Live Inventory Simulator */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  ⚡ Interactive Feature 2 Simulator: Low-Stock Alerts &amp; Instant Restock
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Shows how Redux updates inventory state and clears critical alerts upon restock:
+                </p>
+              </div>
+              <span className="badge badge-amber">Redux State Mutator</span>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8' }}>
+                    <th style={{ padding: '12px' }}>Product</th>
+                    <th style={{ padding: '12px' }}>SKU</th>
+                    <th style={{ padding: '12px' }}>Stock Qty</th>
+                    <th style={{ padding: '12px' }}>Status</th>
+                    <th style={{ padding: '12px' }}>Price</th>
+                    <th style={{ padding: '12px', textAlign: 'right' }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inventory.map(item => (
+                    <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <td style={{ padding: '12px', fontWeight: 600, color: '#f8fafc' }}>{item.name}</td>
+                      <td style={{ padding: '12px', color: '#94a3b8', fontFamily: 'JetBrains Mono' }}>{item.sku}</td>
+                      <td style={{ padding: '12px', fontWeight: 700, color: item.stock <= 5 ? '#f43f5e' : '#10b981' }}>
+                        {item.stock} units
+                      </td>
+                      <td style={{ padding: '12px' }}>
+                        <span className={`badge ${item.stock <= 5 ? 'badge-amber' : 'badge-emerald'}`}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px', color: '#cbd5e1' }}>{item.price}</td>
+                      <td style={{ padding: '12px', textAlign: 'right' }}>
+                        {item.stock <= 5 ? (
+                          <button
+                            className="btn btn-primary"
+                            style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                            onClick={() => handleRestock(item.id)}
+                          >
+                            + Restock 20
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '0.75rem', color: '#10b981' }}>✓ Optimized</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // Q3: AI RESUME BUILDER (5 UNIQUE AI FEATURES)
+    // ============================================================================
+    function QuestionThreeAI() {
+      const [rawBullet, setRawBullet] = useState("I worked on creating website pages with React and fixed bugs.");
+      const [aiResult, setAiResult] = useState("");
+      const [atsScore, setAtsScore] = useState(82);
+
+      const handleAiEnhance = () => {
+        setAiResult("Architected 14+ reusable high-performance React components with Redux Toolkit, decreasing client-side bundle size by 35% and accelerating page load speed by 1.8s for 50,000+ monthly active users.");
+      };
+
+      const aiFeatures = [
+        {
+          id: 1,
+          icon: "🎯",
+          title: "Target Job Description ATS Match & Keyword Optimizer",
+          desc: "Analyzes the user's resume against any target job posting (e.g., Senior React Engineer at Flipkart). It computes a real-time match percentage (0–100%) and highlights critical missing keywords and frameworks required by automated recruitment bots."
+        },
+        {
+          id: 2,
+          icon: "✨",
+          title: "Dynamic Action-Verb & Metrics Bullet Point Rewriter",
+          desc: "Transforms weak, passive bullet points into impactful, achievement-oriented statements using the Google XYZ formula: 'Accomplished [X], as measured by [Y], by doing [Z]'."
+        },
+        {
+          id: 3,
+          icon: "🎭",
+          title: "Role-Specific AI Persona & Cultural Tone Adapter",
+          desc: "Adjusts the executive summary and narrative tone according to target company culture — dynamically switching between Corporate Enterprise (formal, risk-conscious) and Y-Combinator Tech Startup (fast-moving, disruptive, product-focused)."
+        },
+        {
+          id: 4,
+          icon: "🔍",
+          title: "Career Gap & Transition Strategy Advisor",
+          desc: "Detects employment timeline breaks or major career switches, providing structured hybrid resume layouts and automated suggestions for mini-capstone projects to validate transferable skills."
+        },
+        {
+          id: 5,
+          icon: "🎙️",
+          title: "Resume-Derived AI Mock Interview Question Generator",
+          desc: "Scans the generated resume to automatically formulate technical architecture questions and behavioral scenarios, coaching the applicant with tailored STAR-method talking points."
+        },
+      ];
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Header Card */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 3</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>AI Resume Builder — 5 Unique AI Features</h2>
+              </div>
+              <span className="badge badge-emerald">ChatGPT Brainstormed</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              List 5 unique features for an AI-powered Resume Builder app that goes beyond just filling forms (personalize, analyze, or improve resumes).
+            </p>
+          </div>
+
+          {/* AI Features Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+            {aiFeatures.map(item => (
+              <div key={item.id} className="glass-card" style={{ padding: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '26px' }}>{item.icon}</span>
+                  <div>
+                    <span className="badge badge-primary" style={{ fontSize: '0.65rem', padding: '2px 8px' }}>Feature #{item.id}</span>
+                    <h4 style={{ fontSize: '0.96rem', fontWeight: 700, color: '#f8fafc', marginTop: '2px' }}>{item.title}</h4>
+                  </div>
+                </div>
+                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Interactive AI Transformer Simulator */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  🤖 Live Feature 2 Simulator: AI Bullet Point Enhancer
+                </h3>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Test how the AI rewriter converts passive text into quantifiable metrics:
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Target ATS Score:</span>
+                <span className="badge badge-emerald">{atsScore}% Optimized</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+              {/* Input */}
+              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#f59e0b', marginBottom: '6px', textTransform: 'uppercase' }}>
+                  ❌ Generic Draft (Input)
+                </div>
+                <textarea
+                  style={{ width: '100%', height: '80px', background: 'transparent', border: 'none', color: '#cbd5e1', fontSize: '0.85rem', resize: 'none', outline: 'none', fontFamily: 'Inter' }}
+                  value={rawBullet}
+                  onChange={(e) => setRawBullet(e.target.value)}
+                />
+                <button
+                  className="btn btn-primary"
+                  style={{ width: '100%', marginTop: '8px' }}
+                  onClick={handleAiEnhance}
+                >
+                  ⚡ Transform with AI (XYZ Formula)
+                </button>
+              </div>
+
+              {/* Output */}
+              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', marginBottom: '6px', textTransform: 'uppercase' }}>
+                  ✨ AI-Optimized Statement (Output)
+                </div>
+                {aiResult ? (
+                  <p style={{ fontSize: '0.88rem', color: '#f8fafc', lineHeight: 1.5, background: 'rgba(16, 185, 129, 0.08)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                    "{aiResult}"
+                  </p>
+                ) : (
+                  <p style={{ fontSize: '0.82rem', color: '#64748b', fontStyle: 'italic', paddingTop: '16px' }}>
+                    Click the button to preview the AI-engineered bullet point...
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // Q4: USER FLOW DIAGRAM (SOUNDPULSE APP)
+    // ============================================================================
+    function QuestionFourFlow() {
+      const [currentStep, setCurrentStep] = useState(1);
+
+      const steps = [
+        {
+          step: 1,
+          title: "Landing Page",
+          icon: "🌐",
+          desc: "User visits the root URL. The hero section presents the value proposition, previews demo mood tracklists, and displays a prominent 'Get Started' call-to-action.",
+          redux: "Public route (no auth required)"
+        },
+        {
+          step: 2,
+          title: "Authentication",
+          icon: "🔐",
+          desc: "User signs in with email/OAuth. The server returns a JWT; Redux authSlice updates with user token, profile info, and redirects to dashboard.",
+          redux: "dispatch(loginSuccess(user))"
+        },
+        {
+          step: 3,
+          title: "Dashboard Feed",
+          icon: "📊",
+          desc: "The protected home screen loads trending genres, listening statistics, and the interactive Mood/Activity selector bar.",
+          redux: "dispatch(fetchUserPreferences())"
+        },
+        {
+          step: 4,
+          title: "Core Feature: Mood Curation",
+          icon: "⚡",
+          desc: "User clicks 'Focus' or 'Gym'. The AI recommendation engine queries track attributes (BPM, acousticness) and populates a 20-track tailored queue.",
+          redux: "dispatch(generateMoodPlaylist('focus'))"
+        },
+        {
+          step: 5,
+          title: "Player Interaction",
+          icon: "🎵",
+          desc: "User streams songs, toggles play/pause, scrubs the timeline seek-bar, bookmarks favorites, and saves the custom playlist to their library.",
+          redux: "dispatch(playTrack(track)) & dispatch(addToFavorites(id))"
+        },
+        {
+          step: 6,
+          title: "Session Exit / Logout",
+          icon: "🔒",
+          desc: "User accesses settings and clicks Logout. Redux state resets to initial state, clears stored tokens, and securely returns to the landing page.",
+          redux: "dispatch(logout())"
+        },
+      ];
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Header Card */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 4</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>User Interaction Flow Diagram</h2>
+              </div>
+              <span className="badge badge-amber">Interactive 6-Step Journey</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              Draw a simple flow diagram showing how a user would interact with your chosen app idea — from landing page to main feature completion (includes login, dashboard, main feature, and logout).
+            </p>
+          </div>
+
+          {/* Stepper Navigation */}
+          <div className="glass-card" style={{ padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', overflowX: 'auto', gap: '8px', paddingBottom: '4px' }}>
+              {steps.map(s => (
+                <button
+                  key={s.step}
+                  onClick={() => setCurrentStep(s.step)}
+                  style={{
+                    flex: 1,
+                    minWidth: '120px',
+                    padding: '10px',
+                    borderRadius: '10px',
+                    background: currentStep === s.step ? 'rgba(99, 102, 241, 0.25)' : 'rgba(15, 23, 42, 0.6)',
+                    border: currentStep === s.step ? '1px solid #6366f1' : '1px solid rgba(255,255,255,0.06)',
+                    color: currentStep === s.step ? '#ffffff' : '#94a3b8',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ fontSize: '18px', marginBottom: '2px' }}>{s.icon}</div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700 }}>Step {s.step}</div>
+                  <div style={{ fontSize: '0.7rem', color: currentStep === s.step ? '#818cf8' : '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.title}</div>
+                </button>
+              ))}
+            </div>
+
+            {/* Active Step Details */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
+                <span style={{ fontSize: '28px' }}>{steps[currentStep - 1].icon}</span>
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc' }}>
+                    Step {currentStep}: {steps[currentStep - 1].title}
+                  </h3>
+                  <span className="badge badge-primary" style={{ fontFamily: 'JetBrains Mono', fontSize: '0.7rem' }}>
+                    Redux Action: {steps[currentStep - 1].redux}
+                  </span>
+                </div>
+              </div>
+              <p style={{ color: '#cbd5e1', fontSize: '0.9rem', lineHeight: 1.6, marginTop: '8px' }}>
+                {steps[currentStep - 1].desc}
+              </p>
+            </div>
+          </div>
+
+          {/* Embedded Visual Vector Flow Diagram */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#38bdf8' }}>
+                🖼️ High-Resolution Architecture SVG Flow Diagram
+              </h3>
+              <a href="/flow_diagram.svg" target="_blank" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
+                ↗ Open Full SVG
+              </a>
+            </div>
+            <div style={{ width: '100%', background: '#0b1120', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', textAlign: 'center', padding: '12px' }}>
+              <img src="/flow_diagram.svg" alt="User Interaction Flow Diagram" style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // Q5: CAPSTONE THEME COMPARISON & CHOICE
+    // ============================================================================
+    function QuestionFiveChoice() {
+      const themes = [
+        {
+          name: "AI Resume Builder",
+          badge: "HR / EdTech",
+          complexity: "Medium",
+          stateManagement: "Step-by-step form wizard, live preview updates, PDF output state",
+          bestFor: "Form validation, rich document rendering, ATS parsing",
+          score: 84
+        },
+        {
+          name: "Smart E-Commerce Dashboard",
+          badge: "Enterprise SaaS / Retail",
+          complexity: "High (Optimal)",
+          stateManagement: "Global filters, orders pipeline, inventory thresholds, chart analytics, normalized caches",
+          bestFor: "Senior React & Redux Toolkit engineering, enterprise admin consoles",
+          score: 96,
+          winner: true
+        },
+        {
+          name: "AI Blog Creator",
+          badge: "Content / CMS",
+          complexity: "Medium",
+          stateManagement: "Rich-text editor drafts, category tags, publishing queue",
+          bestFor: "Content publishing, Markdown formatting, SEO tools",
+          score: 80
+        },
+      ];
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Header Card */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <span className="badge badge-primary" style={{ marginBottom: '8px' }}>QUESTION 5</span>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Capstone Theme Comparison &amp; Final Choice</h2>
+              </div>
+              <span className="badge badge-emerald">Selected: Smart E-Commerce Dashboard</span>
+            </div>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem' }}>
+              Compare the three example project themes (AI Resume Builder, Smart E-Commerce Dashboard, AI Blog Creator) and write which one you would choose for your capstone and why, mentioning at least two reasons based on your interests or career goals.
+            </p>
+          </div>
+
+          {/* Comparison Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+            {themes.map((t, idx) => (
+              <div
+                key={idx}
+                className="glass-card"
+                style={{
+                  padding: '22px',
+                  border: t.winner ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--card-border)',
+                  background: t.winner ? 'rgba(16, 185, 129, 0.05)' : 'var(--card-bg)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                  <div>
+                    <span className="badge badge-primary" style={{ fontSize: '0.7rem' }}>{t.badge}</span>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc', marginTop: '6px' }}>{t.name}</h3>
+                  </div>
+                  {t.winner && <span className="badge badge-emerald">★ My Choice</span>}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.84rem' }}>
+                  <div>
+                    <span style={{ color: '#94a3b8' }}>State Complexity: </span>
+                    <strong style={{ color: '#f8fafc' }}>{t.complexity}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: '#94a3b8' }}>Redux Suitability: </span>
+                    <p style={{ color: '#cbd5e1', marginTop: '2px' }}>{t.stateManagement}</p>
+                  </div>
+                  <div>
+                    <span style={{ color: '#94a3b8' }}>Strongest Learning Area: </span>
+                    <p style={{ color: '#38bdf8', marginTop: '2px' }}>{t.bestFor}</p>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Capstone Fit Index:</span>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 700, color: t.winner ? '#10b981' : '#cbd5e1' }}>{t.score}/100</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Justification & Career Reasons Card */}
+          <div className="glass-card" style={{ padding: '24px' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#10b981', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🎯 Why I Chose The "Smart E-Commerce Dashboard" (Career Goals &amp; Rationale)
+            </h3>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>🔥</span>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+                    Reason 1: Comprehensive Redux Toolkit State Architecture
+                  </h4>
+                </div>
+                <p style={{ fontSize: '0.86rem', color: '#cbd5e1', lineHeight: 1.55 }}>
+                  An e-commerce dashboard handles interdependent global state across multiple domain slices (<code style={{ color: '#818cf8' }}>authSlice</code>, <code style={{ color: '#818cf8' }}>ordersSlice</code>, <code style={{ color: '#818cf8' }}>inventorySlice</code>, <code style={{ color: '#818cf8' }}>analyticsSlice</code>). Mastering <code style={{ color: '#818cf8' }}>createAsyncThunk</code> for API calls, normalized entity adapters (<code style={{ color: '#818cf8' }}>createEntityAdapter</code>), and memoized reselect queries (<code style={{ color: '#818cf8' }}>createSelector</code>) provides the exact deep-dive experience evaluated during React technical interviews.
+                </p>
+              </div>
+
+              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '18px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>💼</span>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+                    Reason 2: Direct Match with Enterprise IT &amp; SaaS Developer Roles
+                  </h4>
+                </div>
+                <p style={{ fontSize: '0.86rem', color: '#cbd5e1', lineHeight: 1.55 }}>
+                  Over 75% of modern React frontend job openings in IT companies, fintech, and startups require building internal portals, merchant dashboards, and data-heavy analytics views rather than static landing pages. Building a feature-complete dashboard with interactive charts, responsive tables, and low-stock alert triggers directly demonstrates job-ready competency to hiring managers.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ============================================================================
+    // MAIN APP COMPONENT
+    // ============================================================================
+    function App() {
+      const [activeTab, setActiveTab] = useState('q1');
+      const [isLoginOpen, setIsLoginOpen] = useState(false);
+      const [currentUser, setCurrentUser] = useState(() => {
+        try {
+          const saved = localStorage.getItem('soundpulse_user');
+          return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+          return null;
+        }
+      });
+
+      const handleLoginSuccess = (user) => {
+        setCurrentUser(user);
+        try {
+          localStorage.setItem('soundpulse_user', JSON.stringify(user));
+        } catch (e) {}
+      };
+
+      const handleLogout = () => {
+        setCurrentUser(null);
+        try {
+          localStorage.removeItem('soundpulse_user');
+        } catch (e) {}
+      };
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <Header
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            currentUser={currentUser}
+            onOpenLogin={() => setIsLoginOpen(true)}
+            onLogout={handleLogout}
+          />
+          
+          <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px', flex: 1, width: '100%' }}>
+            {activeTab === 'q1' && <QuestionOneScope />}
+            {activeTab === 'q2' && <QuestionTwoDashboard />}
+            {activeTab === 'q3' && <QuestionThreeAI />}
+            {activeTab === 'q4' && <QuestionFourFlow />}
+            {activeTab === 'q5' && <QuestionFiveChoice />}
+            {activeTab === 'api' && (
+              <LiveApiAndAuthDemo
+                currentUser={currentUser}
+                onOpenLogin={() => setIsLoginOpen(true)}
+                onLogout={handleLogout}
+              />
+            )}
+          </main>
+
+          <LoginModal
+            isOpen={isLoginOpen}
+            onClose={() => setIsLoginOpen(false)}
+            onLoginSuccess={handleLoginSuccess}
+          />
+
+          <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 24px', textAlign: 'center', color: '#64748b', fontSize: '0.8rem', background: 'rgba(9, 13, 22, 0.95)' }}>
+            TOPS Technology — Redux Core Concepts Capstone Assignment • Running on Node HTTP Server (Port 3001)
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

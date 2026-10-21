@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="zomatoRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4f5f" />
+      <stop offset="100%" stop-color="#e23744" />
+    </linearGradient>
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#fafafa" />
+    </linearGradient>
+    <linearGradient id="offerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff7e5f" />
+      <stop offset="100%" stop-color="#feb47b" />
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.08" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="700" fill="#f4f5f7" rx="8" />
+
+  <!-- Top Spec Header -->
+  <rect width="1000" height="42" fill="#1c1c1c" rx="8 8 0 0" />
+  <text x="24" y="26" fill="#ffffff" font-family="'Segoe UI', Inter, sans-serif" font-size="14" font-weight="bold">FIGMA HIGH-FIDELITY WIREFRAME: ZOMATO-STYLE USER DASHBOARD</text>
+  <text x="970" y="26" fill="#e23744" font-family="monospace" font-size="12" font-weight="bold" text-anchor="end">Components: Buttons, Cards, Carousel</text>
+
+  <!-- ================= 1. TOP NAVIGATION BAR ================= -->
+  <g transform="translate(20, 56)" filter="url(#shadow)">
+    <rect width="960" height="64" fill="#ffffff" rx="10" />
+    
+    <!-- Zomato Brand -->
+    <text x="24" y="40" fill="#e23744" font-family="'Segoe UI', sans-serif" font-size="24" font-weight="900" font-style="italic">zomato</text>
+    
+    <!-- Location Pin Selector -->
+    <g transform="translate(140, 16)">
+      <rect width="180" height="34" fill="#f8f9fa" stroke="#e2e8f0" rx="8" />
+      <text x="12" y="22" fill="#e23744" font-size="14">📍</text>
+      <text x="32" y="21" fill="#1c1c1c" font-family="Inter, sans-serif" font-size="11" font-weight="600">Ahmedabad, Gujarat ▾</text>
+    </g>
+
+    <!-- Global Search -->
+    <g transform="translate(330, 16)">
+      <rect width="380" height="34" fill="#f8f9fa" stroke="#e2e8f0" rx="8" />
+      <text x="14" y="22" fill="#9ca3af" font-size="13">🔍</text>
+      <text x="38" y="21" fill="#9ca3af" font-family="Inter, sans-serif" font-size="12">Search for restaurant, cuisine or a dish</text>
+    </g>
+
+    <!-- User Profile & Navigation -->
+    <g transform="translate(730, 16)">
+      <rect width="100" height="34" fill="#fff5f6" stroke="#fed7d7" rx="8" />
+      <text x="50" y="22" fill="#e23744" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">👑 Gold Member</text>
+      
+      <circle cx="130" cy="17" r="16" fill="url(#zomatoRed)" />
+      <text x="130" y="22" fill="#ffffff" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">M</text>
+      <text x="160" y="22" fill="#1c1c1c" font-family="Inter, sans-serif" font-size="12" font-weight="600">Mamta ▾</text>
+    </g>
+  </g>
+
+  <!-- ================= 2. ACTIVE OFFERS BANNER ================= -->
+  <g transform="translate(20, 134)" filter="url(#shadow)">
+    <rect width="960" height="90" fill="url(#offerGrad)" rx="12" />
+    <text x="30" y="42" fill="#ffffff" font-family="'Segoe UI', Inter, sans-serif" font-size="20" font-weight="800">🎉 FLAT 50% OFF ON YOUR NEXT 3 ORDERS!</text>
+    <text x="30" y="66" fill="#fff5f5" font-family="Inter, sans-serif" font-size="13">Use code <tspan font-weight="bold" fill="#ffffff">ZOMATOPRO50</tspan> • Valid on top rated gourmet restaurants across your city</text>
+    
+    <!-- CTA Button Component -->
+    <rect x="800" y="28" width="130" height="36" fill="#ffffff" rx="8" />
+    <text x="865" y="51" fill="#e23744" font-family="Inter, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Claim Offer ➔</text>
+  </g>
+
+  <!-- ================= 3. SECTION 1: RECENT ORDERS (CAROUSEL / ROW) ================= -->
+  <g transform="translate(20, 240)">
+    <div style="display: flex;">
+      <text x="0" y="16" fill="#1c1c1c" font-family="'Segoe UI', Inter, sans-serif" font-size="16" font-weight="bold">🕒 Recent Orders &amp; Quick Re-order</text>
+      <text x="960" y="16" fill="#e23744" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="end">View All Orders (18) ➔</text>
+    </div>
+
+    <!-- Order Card 1 -->
+    <g transform="translate(0, 30)" filter="url(#shadow)">
+      <rect width="465" height="120" fill="#ffffff" rx="10" />
+      <rect x="12" y="12" width="96" height="96" fill="#fecdd3" rx="8" />
+      <text x="60" y="66" fill="#e11d48" font-size="34" text-anchor="middle">🍕</text>
+      
+      <text x="120" y="34" fill="#1c1c1c" font-family="Inter, sans-serif" font-size="14" font-weight="bold">La Pino'z Pizza</text>
+      <text x="120" y="52" fill="#64748b" font-family="Inter, sans-serif" font-size="11">7-Cheese Pizza, Garlic Breadsticks</text>
+      <text x="120" y="70" fill="#059669" font-family="Inter, sans-serif" font-size="11" font-weight="600">✓ Delivered Yesterday at 8:42 PM</text>
+      <text x="120" y="96" fill="#1c1c1c" font-family="Inter, sans-serif" font-size="13" font-weight="bold">₹489</text>
+
+      <!-- Re-order Button Component -->
+      <rect x="330" y="70" width="120" height="34" fill="#e23744" rx="6" />
+      <text x="390" y="92" fill="#ffffff" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">🔁 Reorder</text>
+    </g>
+
+    <!-- Order Card 2 -->
+    <g transform="translate(495, 30)" filter="url(#shadow)">
+      <rect width="465" height="120" fill="#ffffff" rx="10" />
+      <rect x="12" y="12" width="96" height="96" fill="#fed7aa" rx="8" />
+      <text x="60" y="66" fill="#ea580c" font-size="34" text-anchor="middle">🍱</text>
+      
+      <text x="120" y="34" fill="#1c1c1c" font-family="Inter, sans-serif" font-size="14" font-weight="bold">Gwalia Sweets &amp; Fast Food</text>
+      <text x="120" y="52" fill="#64748b" font-family="Inter, sans-serif" font-size="11">Special Gujarati Thali, Gulab Jamun</text>
+      <text x="120" y="70" fill="#059669" font-family="Inter, sans-serif" font-size="11" font-weight="600">✓ Delivered on Sunday</text>
+      <text x="120" y="96" fill="#1c1c1c" font-family="Inter, sans-serif" font-size="13" font-weight="bold">₹360</text>
+
+      <rect x="330" y="70" width="120" height="34" fill="#e23744" rx="6" />
+      <text x="390" y="92" fill="#ffffff" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">🔁 Reorder</text>
+    </g>
+  </g>
+
+  <!-- ================= 4. SECTION 2: SAVED RESTAURANTS ================= -->
+  <g transform="translate(20, 410)">
+    <text x="0" y="16" fill="#1c1c1c" font-family="'Segoe UI', Inter, sans-serif" font-size="16" font-weight="bold">❤️ Saved Restaurants (Bookmarks)</text>
+    <text x="960" y="16" fill="#e23744" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="end">Manage Favorites (8) ➔</text>
+
+    <!-- Restaurant Card 1 -->
+    <g transform="translate(0, 30)" filter="url(#shadow)">
+      <rect width="300" height="230" fill="#ffffff" rx="10" />
+      <!-- Image box -->
+      <rect width="300" height="130" fill="#cbd5e1" rx="10 10 0 0" />
+      <text x="150" y="75" fill="#475569" font-size="44" text-anchor="middle">🍔</text>
+      <rect x="12" y="12" width="70" height="22" fill="#10b981" rx="4" />
+      <text x="47" y="27" fill="#ffffff" font-family="Inter, sans-serif" font-size="11" font-weight="bold" text-anchor="middle">4.6 ★</text>
+      <circle cx="275" cy="22" r="14" fill="#ffffff" />
+      <text x="275" y="27" fill="#e23744" font-size="14" text-anchor="middle">❤️</text>
+
+      <!-- Details -->
+      <text x="14" y="155" fill="#1c1c1c" font-family="Inter, sans-serif" font-size="14" font-weight="bold">Burger Farm</text>
+      <text x="14" y="174" fill="#64748b" font-family="Inter, sans-serif" font-size="11">Burgers, Crispy Fries, Shakes</text>
+      <text x="14" y="194" fill="#94a3b8" font-family="Inter, sans-serif" font-size="11">₹250 for one • 25 mins delivery</text>
+      
+      <rect x="14" y="202" width="272" height="1" fill="#f1f5f9" />
+      <text x="14" y="218" fill="#e23744" font-family="Inter, sans-serif" font-size="11" font-weight="bold">🏷️ Flat ₹100 OFF with Pro</text>
+    </g>
+
+    <!-- Restaurant Card 2 -->
+    <g transform="translate(330, 30)" filter="url(#shadow)">
+      <rect width="300" height="230" fill="#ffffff" rx="10" />
+      <rect width="300" height="130" fill="#cbd5e1" rx="10 10 0 0" />
+      <text x="150" y="75" fill="#475569" font-size="44" text-anchor="middle">🍲</text>
+      <rect x="12" y="12" width="70" height="22" fill="#10b981" rx="4" />
+      <text x="47" y="27" fill="#ffffff" font-family="Inter, sans-serif" font-size="11" font-weight="bold" text-anchor="middle">4.8 ★</text>
+      <circle cx="275" cy="22" r="14" fill="#ffffff" />
+      <text x="275" y="27" fill="#e23744" font-size="14" text-anchor="middle">❤️</text>
+
+      <text x="14" y="155" fill="#1c1c1c" font-family="Inter, sans-serif" font-size="14" font-weight="bold">The Grand Thakar</text>
+      <text x="14" y="174" fill="#64748b" font-family="Inter, sans-serif" font-size="11">North Indian, Kathiyawadi, Biryani</text>
+      <text x="14" y="194" fill="#94a3b8" font-family="Inter, sans-serif" font-size="11">₹400 for one • 35 mins delivery</text>
+      
+      <rect x="14" y="202" width="272" height="1" fill="#f1f5f9" />
+      <text x="14" y="218" fill="#059669" font-family="Inter, sans-serif" font-size="11" font-weight="bold">🛵 FREE Delivery on orders &gt; ₹199</text>
+    </g>
+
+    <!-- Restaurant Card 3 -->
+    <g transform="translate(660, 30)" filter="url(#shadow)">
+      <rect width="300" height="230" fill="#ffffff" rx="10" />
+      <rect width="300" height="130" fill="#cbd5e1" rx="10 10 0 0" />
+      <text x="150" y="75" fill="#475569" font-size="44" text-anchor="middle">☕</text>
+      <rect x="12" y="12" width="70" height="22" fill="#10b981" rx="4" />
+      <text x="47" y="27" fill="#ffffff" font-family="Inter, sans-serif" font-size="11" font-weight="bold" text-anchor="middle">4.5 ★</text>
+      <circle cx="275" cy="22" r="14" fill="#ffffff" />
+      <text x="275" y="27" fill="#e23744" font-size="14" text-anchor="middle">❤️</text>
+
+      <text x="14" y="155" fill="#1c1c1c" font-family="Inter, sans-serif" font-size="14" font-weight="bold">Roastery Coffee House</text>
+      <text x="14" y="174" fill="#64748b" font-family="Inter, sans-serif" font-size="11">Artisan Coffee, Bakery, Desserts</text>
+      <text x="14" y="194" fill="#94a3b8" font-family="Inter, sans-serif" font-size="11">₹300 for one • 20 mins delivery</text>
+      
+      <rect x="14" y="202" width="272" height="1" fill="#f1f5f9" />
+      <text x="14" y="218" fill="#e23744" font-family="Inter, sans-serif" font-size="11" font-weight="bold">🏷️ 20% OFF with ICICI Cards</text>
+    </g>
+  </g>
+</svg>
