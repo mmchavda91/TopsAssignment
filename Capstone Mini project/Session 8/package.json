@@ -1,0 +1,19 @@
+{
+  "name": "session-8-responsive-lighthouse",
+  "version": "1.0.0",
+  "description": "Session 8: Responsive Testing, Cross-Browser Compatibility & Lighthouse Audit (Q1 to Q5)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "react",
+    "responsive",
+    "devtools",
+    "lighthouse",
+    "cross-browser"
+  ],
+  "author": "Mamta",
+  "license": "ISC"
+}

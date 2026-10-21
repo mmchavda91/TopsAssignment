@@ -1,0 +1,17 @@
+{
+  "name": "session-5-firebase-firestore",
+  "version": "1.0.0",
+  "description": "Session 5: Firebase Firestore with React (Q1 to Q5)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "react",
+    "firebase",
+    "firestore"
+  ],
+  "author": "Mamta",
+  "license": "ISC"
+}

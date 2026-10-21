@@ -1,0 +1,19 @@
+{
+  "name": "session-7-ai-apis",
+  "version": "1.0.0",
+  "description": "Session 7: AI APIs & React Integration (Hugging Face, OpenAI, Prompt Tuning, Error Handling)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "react",
+    "ai",
+    "huggingface",
+    "openai",
+    "prompt-tuning"
+  ],
+  "author": "Mamta",
+  "license": "ISC"
+}

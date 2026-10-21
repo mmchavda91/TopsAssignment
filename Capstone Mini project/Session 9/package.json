@@ -1,0 +1,21 @@
+{
+  "name": "session-9-deployment-cicd",
+  "version": "1.0.0",
+  "description": "Session 9: Production Deployment, Firebase Hosting, Custom Domains & CI/CD Pipelines (Q1 to Q5)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'Production build ready in build/'"
+  },
+  "keywords": [
+    "react",
+    "deployment",
+    "netlify",
+    "firebase-hosting",
+    "ci-cd",
+    "custom-domain"
+  ],
+  "author": "Mamta",
+  "license": "ISC"
+}

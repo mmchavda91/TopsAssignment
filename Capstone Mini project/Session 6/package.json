@@ -1,0 +1,19 @@
+{
+  "name": "session-6-firebase-auth",
+  "version": "1.0.0",
+  "description": "Session 6: Firebase Authentication & React (Q1 to Q5)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "react",
+    "firebase",
+    "auth",
+    "context-api",
+    "spotify"
+  ],
+  "author": "Mamta",
+  "license": "ISC"
+}
