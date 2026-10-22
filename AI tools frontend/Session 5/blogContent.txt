@@ -1,0 +1,53 @@
+================================================================================
+SESSION 5 - QUESTION 2: ZOMATO-STYLE FOOD BLOG CONTENT
+================================================================================
+Trending Food Item: Paneer Butter Masala (Restaurant-Style & Dhaba-Twist)
+Target Platform: Zomato Food Stories / Epicurean Blog
+Focus SEO Keywords: authentic paneer butter masala, creamy butter paneer, best paneer butter masala recipe, restaurant style gravy, north indian food delivery
+================================================================================
+
+[1] CHATGPT PROMPT USED:
+--------------------------------------------------------------------------------
+"Act as a professional food blogger and SEO content strategist for Zomato. Write an enticing, SEO-friendly introduction (150-180 words) for a blog post titled 'The Secret to Restaurant-Style Paneer Butter Masala at Home'. The intro must hook foodies immediately, evoke irresistible aroma and texture, and naturally integrate search terms like 'creamy paneer butter masala', 'authentic makhani gravy', and 'restaurant-style paneer recipe'.
+
+Also generate 3 descriptive, accessibility-compliant, and keyword-rich ALT texts for 3 high-resolution food photographs used across the article:
+1. Hero image: Finished bowl of Paneer Butter Masala with cream and butter garnish.
+2. Step-by-step process: Slow-cooking spiced cashew-tomato puree in a skillet.
+3. Plating/Pairing: Freshly baked butter garlic naan dipping into the rich paneer gravy."
+
+
+--------------------------------------------------------------------------------
+[2] CHATGPT GENERATED OUTPUT:
+--------------------------------------------------------------------------------
+
+=== BLOG POST INTRODUCTION ===
+
+There is something undeniably magical about that first heavenly spoonful of velvety, flame-kissed Paneer Butter Masala. Whether you are scrolling through Zomato on a rainy Friday evening or craving the nostalgic indulgence of your favorite roadside dhaba, nothing comforts the soul quite like soft, melt-in-the-mouth cottage cheese cubes gently enveloped in a luscious, silken makhani gravy. 
+
+Crafting an authentic restaurant-style paneer butter masala at home often feels like a culinary mystery—why does the homemade gravy rarely achieve that signature glossy sheen, smoky depth, and harmonious sweet-tangy balance? 
+
+The secret lies not in complex spices, but in the gentle art of emulsification: ripe vine tomatoes, hand-pounded Kashmiri chilies, slow-roasted cashew paste, and a generous dollop of churned white butter finished with fragrant, crushed Kasuri methi. In this ultimate food guide, we unlock the chef-tested secrets, precise spice ratios, and restaurant techniques to recreate India's most ordered comfort curry right in your home kitchen. Get your naans ready—it's time to master the holy grail of North Indian cuisine.
+
+
+=== 3 SEO-FRIENDLY IMAGE ALT TEXTS ===
+
+IMAGE 1 (Hero Shot - Main Dish):
+"Close-up of freshly cooked restaurant-style paneer butter masala served in a traditional hammered copper handi, garnished with a swirl of fresh heavy cream, melted butter cube, and crushed kasuri methi."
+
+IMAGE 2 (Cooking Process - Makhani Base):
+"Simmering aromatic tomato cashew gravy in a black cast iron skillet with golden butter droplets, whole green cardamom, and rich Kashmiri red chili puree during reduction."
+
+IMAGE 3 (Serving & Pairing Shot):
+"Tearing a piece of hot, charred butter garlic naan and scooping a succulent cube of paneer from a bowl of creamy orange paneer butter masala with julienned ginger."
+
+
+--------------------------------------------------------------------------------
+[3] SEO & ACCESSIBILITY STRATEGY BREAKDOWN:
+--------------------------------------------------------------------------------
+1. User Intent Alignment:
+   - Targets both culinary cooks searching for the "secret" to making it at home and food delivery fans browsing Zomato for the best gravy profiles.
+2. Sensory & LSI Keywords:
+   - Includes natural synonyms: "makhani gravy", "cottage cheese cubes", "Kasuri methi", "butter garlic naan", "North Indian cuisine".
+3. Screen Reader & Image Search SEO:
+   - Every alt text follows the formula: [Subject + Action/State + Specific Visual Attributes + Key Context]
+   - Avoids generic "image of food" or keyword stuffing. Screen reader users can visualize the exact texture and presentation.

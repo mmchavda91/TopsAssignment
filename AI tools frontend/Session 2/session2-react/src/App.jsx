@@ -6,6 +6,7 @@ import ZomatoRestaurantListing from "./components/ZomatoRestaurantListing";
 import "./components/ZomatoRestaurantListing.css";
 import YouTubeVideoList from "./components/YouTubeVideoList";
 import "./components/YouTubeVideoList.css";
+import OptimizedImageDemo from "./components/OptimizedImageDemo";
 import "./App.css";
 
 // Sample data for PlaylistCard (Q1)
@@ -30,6 +31,7 @@ const TABS = [
   { id: "q3", label: "Q3 — Zomato", emoji: "🍽️" },
   { id: "q4", label: "Q4 — YouTube", emoji: "▶️" },
   { id: "q5", label: "Q5 — Review", emoji: "📝" },
+  { id: "s4q3", label: "Session 4 Q3 — WebP Opt", emoji: "⚡" },
 ];
 
 function App() {
@@ -178,6 +180,10 @@ function App() {
               </div>
             </div>
           </section>
+        )}
+        {/* Session 4 Q3: WebP Optimization Demo */}
+        {activeTab === "s4q3" && (
+          <OptimizedImageDemo />
         )}
       </main>
     </div>

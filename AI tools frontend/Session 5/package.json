@@ -1,0 +1,22 @@
+{
+  "name": "session-5",
+  "version": "1.0.0",
+  "description": "Session 5: AI-Driven SEO & Content Optimization - Complete Assignments",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "seo",
+    "chatgpt",
+    "meta-tags",
+    "keyword-clustering",
+    "content-optimization",
+    "alt-text",
+    "plagiarism-check"
+  ],
+  "author": "",
+  "license": "ISC"
+}

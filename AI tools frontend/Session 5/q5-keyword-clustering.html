@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Food Delivery Keyword Clustering Matrix (Swiggy / Zomato) | Session 5</title>
+  <meta name="description" content="SEO Keyword Clustering Strategy for Online Food Delivery (Swiggy & Zomato) with intent classification and topical authority mapping.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0d131f;
+      color: #f1f5f9;
+      line-height: 1.6;
+      padding: 32px 16px;
+    }
+    .wrapper {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .page-header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .badge-tag {
+      background: #f97316;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .desc {
+      font-size: 16px;
+      color: #94a3b8;
+      max-width: 800px;
+    }
+
+    /* Core Answer Highlight Box (The 1-line answer required) */
+    .core-highlight-box {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-left: 4px solid #38bdf8;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 36px;
+    }
+    .core-highlight-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .core-highlight-quote {
+      font-size: 17px;
+      font-weight: 600;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    /* Clusters Grid */
+    .clusters-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+    @media (max-width: 960px) {
+      .clusters-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .cluster-card {
+      background: #141d30;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .cluster-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .cluster-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .cluster-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .icon-orange {
+      background: rgba(249, 115, 22, 0.15);
+      color: #f97316;
+    }
+    .icon-purple {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+    }
+    .icon-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+
+    .cluster-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cluster-intent {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .keyword-list {
+      list-style: none;
+      margin: 16px 0;
+      flex: 1;
+    }
+    .keyword-pill {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #f8fafc;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .intent-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .tag-trans {
+      background: #0284c7;
+      color: #fff;
+    }
+    .tag-comm {
+      background: #059669;
+      color: #fff;
+    }
+    .tag-nav {
+      background: #7c3aed;
+      color: #fff;
+    }
+
+    .cluster-strategy {
+      background: rgba(0,0,0,0.25);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12.5px;
+      color: #cbd5e1;
+      border-left: 2px solid #64748b;
+    }
+
+    /* Comparison Table */
+    .deep-dive-card {
+      background: #141d30;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 28px;
+    }
+    .deep-dive-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    .metrics-table th {
+      background: rgba(255,255,255,0.05);
+      color: #94a3b8;
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 600;
+    }
+    .metrics-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <header class="page-header">
+      <span class="badge-tag">Assignment Q5</span>
+      <h1 class="title">Online Food Delivery Keyword Clustering (Swiggy / Zomato)</h1>
+      <p class="desc">
+        Clustering 5 high-impact search queries into distinct search intent silos to maximize organic search coverage, prevent keyword cannibalization, and establish topical authority.
+      </p>
+    </header>
+
+    <!-- The 1-Line Explanation Box (Direct Answer) -->
+    <div class="core-highlight-box">
+      <div class="core-highlight-title">🎯 One-Line Explanation: Why Keyword Clustering Helps Organic Search Reach</div>
+      <div class="core-highlight-quote">
+        “Keyword clustering boosts organic search reach by enabling a single, comprehensively optimized landing page to rank for dozens of related search variations simultaneously, building topical authority while eliminating keyword cannibalization.”
+      </div>
+    </div>
+
+    <!-- 3 Clustered Intent Silos -->
+    <section class="clusters-grid">
+
+      <!-- Cluster 1 -->
+      <div class="cluster-card">
+        <div class="cluster-header">
+          <div class="cluster-icon icon-orange">📍</div>
+          <div>
+            <div class="cluster-title">Cluster 1: Local & Urgent Transactional</div>
+            <div class="cluster-intent">Intent: Immediate Location/Time Ordering</div>
+          </div>
+        </div>
+
+        <p style="font-size:13px; color:#94a3b8;">Shoppers with high purchase intent looking for immediate hot food fulfillment based on current coordinates or late night timings.</p>
+
+        <ul class="keyword-list">
+          <li class="keyword-pill">
+            <span>online food delivery near me</span>
+            <span class="intent-tag tag-trans">Transactional</span>
+          </li>
+          <li class="keyword-pill">
+            <span>midnight food delivery Swiggy</span>
+            <span class="intent-tag tag-trans">Urgent Intent</span>
+          </li>
+        </ul>
+
+        <div class="cluster-strategy">
+          <strong>Optimal Landing Page:</strong> Geo-targeted landing pages with dynamic restaurant listings, current delivery ETA badges, and 24/7 late-night operational filters.
+        </div>
+      </div>
+
+      <!-- Cluster 2 -->
+      <div class="cluster-card">
+        <div class="cluster-header">
+          <div class="cluster-icon icon-emerald">🍲</div>
+          <div>
+            <div class="cluster-title">Cluster 2: Dish & Lifestyle Diet Intent</div>
+            <div class="cluster-intent">Intent: Cuisine Cravings & Meal Subscriptions</div>
+          </div>
+        </div>
+
+        <p style="font-size:13px; color:#94a3b8;">Users searching for specific signature delicacies or recurring healthy meal-plan delivery subscriptions.</p>
+
+        <ul class="keyword-list">
+          <li class="keyword-pill">
+            <span>order biryani online</span>
+            <span class="intent-tag tag-comm">Commercial</span>
+          </li>
+          <li class="keyword-pill">
+            <span>healthy food delivery subscription</span>
+            <span class="intent-tag tag-comm">Subscription</span>
+          </li>
+        </ul>
+
+        <div class="cluster-strategy">
+          <strong>Optimal Landing Page:</strong> Dedicated cuisine collection page (e.g. "Best Dum Biryanis in Town") and a health-focused meal planner portal with calorie breakdowns.
+        </div>
+      </div>
+
+      <!-- Cluster 3 -->
+      <div class="cluster-card">
+        <div class="cluster-header">
+          <div class="cluster-icon icon-purple">🏷️</div>
+          <div>
+            <div class="cluster-title">Cluster 3: Promotional & Deal-Seeking</div>
+            <div class="cluster-intent">Intent: Discount Hunter / Price Sensitive</div>
+          </div>
+        </div>
+
+        <p style="font-size:13px; color:#94a3b8;">Users who have already decided to order but are searching for promotional promo codes, bank cashback, or coupon discounts.</p>
+
+        <ul class="keyword-list">
+          <li class="keyword-pill">
+            <span>Zomato discount coupon code</span>
+            <span class="intent-tag tag-nav">Navigational / Deal</span>
+          </li>
+        </ul>
+
+        <div class="cluster-strategy">
+          <strong>Optimal Landing Page:</strong> "Today's Top Zomato Offers & Bank Promo Codes" hub featuring verified promo codes, credit card deals, and free delivery vouchers.
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Deep-Dive Matrix Table -->
+    <div class="deep-dive-card">
+      <h3>Detailed Keyword Attributes &amp; Organic SERP Strategy</h3>
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>Target Keyword</th>
+            <th>Search Volume</th>
+            <th>Search Intent</th>
+            <th>Target Cluster</th>
+            <th>Primary SEO Goal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>online food delivery near me</strong></td>
+            <td>450,000/mo</td>
+            <td>Local Transactional</td>
+            <td>Local &amp; Immediate</td>
+            <td>Rank #1 on Google Local Pack &amp; map listings</td>
+          </tr>
+          <tr>
+            <td><strong>midnight food delivery Swiggy</strong></td>
+            <td>74,000/mo</td>
+            <td>Urgent Transactional</td>
+            <td>Local &amp; Immediate</td>
+            <td>Capture high-converting late-night weekend traffic</td>
+          </tr>
+          <tr>
+            <td><strong>order biryani online</strong></td>
+            <td>165,000/mo</td>
+            <td>Commercial Investigation</td>
+            <td>Dish &amp; Lifestyle</td>
+            <td>Rank category hub showcasing top biryani cloud kitchens</td>
+          </tr>
+          <tr>
+            <td><strong>healthy food delivery subscription</strong></td>
+            <td>28,000/mo</td>
+            <td>Informational / Commercial</td>
+            <td>Dish &amp; Lifestyle</td>
+            <td>Acquire high Customer Lifetime Value (LTV) subscription users</td>
+          </tr>
+          <tr>
+            <td><strong>Zomato discount coupon code</strong></td>
+            <td>210,000/mo</td>
+            <td>Navigational / Promotional</td>
+            <td>Promotional &amp; Deals</td>
+            <td>Prevent checkout bounce and retain cost-conscious eaters</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+</html>
