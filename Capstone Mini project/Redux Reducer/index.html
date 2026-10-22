@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Redux Reducer Assignment: cartReducer, wishlistReducer, combineReducers, redux-thunk async fetchOffers & Redux DevTools Extension" />
+  <title>Redux Reducer: Cart, Wishlist, Thunk Offers & DevTools (Q1 - Q5)</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono with font-display: swap -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- React 18, ReactDOM, Redux 4.2 & Redux-Thunk via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/redux@4.2.1/dist/redux.min.js"></script>
+  <script crossorigin src="https://unpkg.com/redux-thunk@2.4.2/dist/redux-thunk.min.js"></script>
+  <!-- Babel for JSX compilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Modern Styling & CSS Reset -->
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #030712;
+      color: #f3f4f6;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Cross-browser custom scrollbar */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #6366f1 #111827;
+    }
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #111827; }
+    ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+
+    button {
+      font-family: inherit;
+      font-size: 100%;
+      line-height: 1.15;
+      margin: 0;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    button::-moz-focus-inner { border: 0; padding: 0; }
+
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Glassmorphism containers */
+    .glass-card {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React & Redux Application Script -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { createStore, combineReducers, applyMiddleware, compose } = Redux;
+
+    // Robust Redux-Thunk middleware definition (ensures valid function always)
+    const thunk = (typeof window !== 'undefined' && window.ReduxThunk && typeof window.ReduxThunk === 'function')
+      ? window.ReduxThunk
+      : (typeof window !== 'undefined' && window.ReduxThunk && window.ReduxThunk.default)
+      ? window.ReduxThunk.default
+      : ((store) => (next) => (action) => {
+          if (typeof action === 'function') {
+            return action(store.dispatch, store.getState);
+          }
+          return next(action);
+        });
+
+
+
+    // =========================================================================
+    // 1. PRODUCTS DATA
+    // =========================================================================
+    const INITIAL_PRODUCTS = [
+      {
+        id: 'P101',
+        name: 'Sony WH-1000XM5 Noise Cancelling Headphones',
+        category: 'Audio',
+        price: 24999,
+        rating: 4.8,
+        image: '🎧',
+        inStock: true,
+        tag: 'Bestseller'
+      },
+      {
+        id: 'P102',
+        name: 'Apple Watch Series 9 GPS 45mm Midnight',
+        category: 'Wearables',
+        price: 41900,
+        rating: 4.9,
+        image: '⌚',
+        inStock: true,
+        tag: 'Trending'
+      },
+      {
+        id: 'P103',
+        name: 'Logitech MX Master 3S Wireless Mouse',
+        category: 'Accessories',
+        price: 8995,
+        rating: 4.7,
+        image: '🖱️',
+        inStock: true,
+        tag: 'Top Rated'
+      },
+      {
+        id: 'P104',
+        name: 'Keychron K2 Pro Mechanical Keyboard (RGB)',
+        category: 'Accessories',
+        price: 9499,
+        rating: 4.6,
+        image: '⌨️',
+        inStock: true,
+        tag: 'Hot Deal'
+      },
+      {
+        id: 'P105',
+        name: 'Samsung 27" Odyssey OLED G6 Gaming Monitor',
+        category: 'Display',
+        price: 64999,
+        rating: 4.9,
+        image: '🖥️',
+        inStock: true,
+        tag: 'Premium'
+      },
+      {
+        id: 'P106',
+        name: 'Sony PlayStation 5 DualSense Wireless Controller',
+        category: 'Gaming',
+        price: 5990,
+        rating: 4.8,
+        image: '🎮',
+        inStock: true,
+        tag: 'Popular'
+      }
+    ];
+
+    // =========================================================================
+    // 2. REDUX ACTION TYPES
+    // =========================================================================
+    const ADD_TO_CART = 'ADD_TO_CART';
+    const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
+    const UPDATE_QUANTITY = 'UPDATE_QUANTITY';
+    const CLEAR_CART = 'CLEAR_CART';
+
+    const ADD_TO_WISHLIST = 'ADD_TO_WISHLIST';
+    const REMOVE_FROM_WISHLIST = 'REMOVE_FROM_WISHLIST';
+
+    const FETCH_OFFERS_START = 'FETCH_OFFERS_START';
+    const FETCH_OFFERS_SUCCESS = 'FETCH_OFFERS_SUCCESS';
+    const FETCH_OFFERS_FAILURE = 'FETCH_OFFERS_FAILURE';
+
+    // =========================================================================
+    // 3. ACTION CREATORS (Q2 & Q4)
+    // =========================================================================
+    const addToCart = (product) => ({
+      type: ADD_TO_CART,
+      payload: product
+    });
+
+    const removeFromCart = (productId) => ({
+      type: REMOVE_FROM_CART,
+      payload: { id: productId }
+    });
+
+    const updateQuantity = (productId, quantity) => ({
+      type: UPDATE_QUANTITY,
+      payload: { id: productId, quantity }
+    });
+
+    const clearCart = () => ({
+      type: CLEAR_CART
+    });
+
+    const addToWishlist = (product) => ({
+      type: ADD_TO_WISHLIST,
+      payload: product
+    });
+
+    const removeFromWishlist = (productId) => ({
+      type: REMOVE_FROM_WISHLIST,
+      payload: { id: productId }
+    });
+
+    // Async Action Creator using Redux Thunk (Q4)
+    const fetchOffers = () => {
+      return (dispatch) => {
+        dispatch({ type: FETCH_OFFERS_START });
+
+        // Simulating API network call with setTimeout (Hint in Q4)
+        setTimeout(() => {
+          const discountOffers = [
+            {
+              id: 'OFF-1',
+              title: '⚡ Flash Diwali Sale: 25% OFF on Audio Gear',
+              code: 'AUDIO25',
+              discount: '25%',
+              badge: 'Limited Time',
+              expiry: 'Expires in 4 hours'
+            },
+            {
+              id: 'OFF-2',
+              title: '🎁 Bundle Bonus: Free Logitech Mouse Pad with MX 3S',
+              code: 'LOGIBONUS',
+              discount: 'Free Gift',
+              badge: 'Exclusive',
+              expiry: 'Valid today'
+            },
+            {
+              id: 'OFF-3',
+              title: '💳 HDFC & Axis Bank Instant Cashback Rs. 3,000',
+              code: 'BANKCASH',
+              discount: '₹3,000 Off',
+              badge: 'Instant Bank',
+              expiry: 'Till stocks last'
+            }
+          ];
+
+          dispatch({
+            type: FETCH_OFFERS_SUCCESS,
+            payload: discountOffers
+          });
+        }, 1200);
+      };
+    };
+
+    // =========================================================================
+    // 4. REDUCERS (Q1 & Q3)
+    // =========================================================================
+
+    // Q1: cartReducer managing array of items
+    function cartReducer(state = [], action) {
+      switch (action.type) {
+        case ADD_TO_CART: {
+          const existingItemIndex = state.findIndex(item => item.id === action.payload.id);
+          if (existingItemIndex >= 0) {
+            // Item exists, increment quantity immutably
+            return state.map((item, index) =>
+              index === existingItemIndex
+                ? { ...item, quantity: item.quantity + 1 }
+                : item
+            );
+          } else {
+            // New item, add with quantity 1
+            return [...state, { ...action.payload, quantity: 1 }];
+          }
+        }
+
+        case REMOVE_FROM_CART: {
+          return state.filter(item => item.id !== action.payload.id);
+        }
+
+        case UPDATE_QUANTITY: {
+          if (action.payload.quantity <= 0) {
+            return state.filter(item => item.id !== action.payload.id);
+          }
+          return state.map(item =>
+            item.id === action.payload.id
+              ? { ...item, quantity: action.payload.quantity }
+              : item
+          );
+        }
+
+        case CLEAR_CART:
+          return [];
+
+        default:
+          return state;
+      }
+    }
+
+    // Q3: wishlistReducer managing separate wishlist state
+    function wishlistReducer(state = [], action) {
+      switch (action.type) {
+        case ADD_TO_WISHLIST: {
+          const exists = state.some(item => item.id === action.payload.id);
+          if (exists) return state;
+          return [...state, action.payload];
+        }
+
+        case REMOVE_FROM_WISHLIST: {
+          return state.filter(item => item.id !== action.payload.id);
+        }
+
+        default:
+          return state;
+      }
+    }
+
+    // Q4: offersReducer managing async discount offers
+    const initialOffersState = {
+      items: [],
+      loading: false,
+      error: null,
+      lastFetched: null
+    };
+
+    function offersReducer(state = initialOffersState, action) {
+      switch (action.type) {
+        case FETCH_OFFERS_START:
+          return { ...state, loading: true, error: null };
+        case FETCH_OFFERS_SUCCESS:
+          return { ...state, loading: false, items: action.payload, lastFetched: new Date().toLocaleTimeString() };
+        case FETCH_OFFERS_FAILURE:
+          return { ...state, loading: false, error: action.payload };
+        default:
+          return state;
+      }
+    }
+
+    // =========================================================================
+    // 5. ROOT REDUCER & STORE CONFIGURATION WITH DEVTOOLS (Q3 & Q5)
+    // =========================================================================
+    const rootReducer = combineReducers({
+      cart: cartReducer,
+      wishlist: wishlistReducer,
+      offers: offersReducer
+    });
+
+    // Logging middleware to track actions in DevTools visual stream
+    const actionHistory = [];
+    const trackingMiddleware = store => next => action => {
+      const prevState = store.getState();
+      const result = next(action);
+      const nextState = store.getState();
+      actionHistory.unshift({
+        type: action.type,
+        payload: action.payload,
+        time: new Date().toLocaleTimeString(),
+        prevState,
+        nextState
+      });
+      return result;
+    };
+
+    // Q5: Setup Redux DevTools Extension Compose
+    const composeEnhancers = (typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose;
+    const store = createStore(
+      rootReducer,
+      composeEnhancers(applyMiddleware(thunk, trackingMiddleware))
+    );
+
+    // =========================================================================
+    // 6. MAIN REACT APP COMPONENT
+    // =========================================================================
+    function App() {
+      const [reduxState, setReduxState] = useState(store.getState());
+      const [activeTab, setActiveTab] = useState('shop'); // 'shop' | 'cart' | 'wishlist' | 'devtools' | 'docs'
+      const [appliedPromo, setAppliedPromo] = useState(null);
+      const [toast, setToast] = useState(null);
+
+      // Subscribe to store updates
+      useEffect(() => {
+        const unsubscribe = store.subscribe(() => {
+          setReduxState(store.getState());
+        });
+        return () => unsubscribe();
+      }, []);
+
+      const showToast = (message, type = 'info') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      const handleAddToCart = (product) => {
+        store.dispatch(addToCart(product));
+        showToast(`🛒 "${product.name.substring(0, 22)}..." added to cart!`, 'cart');
+      };
+
+      const handleRemoveFromCart = (productId) => {
+        store.dispatch(removeFromCart(productId));
+        showToast(`🗑️ Removed from cart!`, 'remove');
+      };
+
+      const handleToggleWishlist = (product) => {
+        const isFav = reduxState.wishlist.some(item => item.id === product.id);
+        if (isFav) {
+          store.dispatch(removeFromWishlist(product.id));
+          showToast(`💔 Removed from wishlist!`, 'wishlist');
+        } else {
+          store.dispatch(addToWishlist(product));
+          showToast(`❤️ Added to wishlist!`, 'wishlist');
+        }
+      };
+
+      const handleFetchOffers = () => {
+        store.dispatch(fetchOffers());
+      };
+
+      // Calculations
+      const cartItemCount = reduxState.cart.reduce((sum, item) => sum + item.quantity, 0);
+      const subtotal = reduxState.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const discount = appliedPromo ? (subtotal * 0.15) : 0;
+      const total = subtotal - discount;
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+
+          {/* Toast Notification */}
+          {toast && (
+            <div className="animate-fadeIn" style={{
+              position: 'fixed',
+              top: '20px',
+              right: '20px',
+              backgroundColor: toast.type === 'remove' ? '#ef4444' : toast.type === 'wishlist' ? '#ec4899' : '#10b981',
+              color: '#ffffff',
+              padding: '12px 18px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: '700',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <span>{toast.message}</span>
+            </div>
+          )}
+
+          {/* Header Bar */}
+          <header style={{ backgroundColor: '#0b1120', borderBottom: '1px solid #1f2937', position: 'sticky', top: 0, zIndex: 100 }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+              
+              {/* Brand Logo */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'linear-gradient(135deg, #6366f1, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: '#fff', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)' }}>
+                  🛒
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h1 style={{ fontSize: '18px', fontWeight: '800', color: '#fff', margin: 0 }}>
+                      Redux Reducer Hub
+                    </h1>
+                    <span style={{ fontSize: '11px', backgroundColor: '#312e81', color: '#c7d2fe', padding: '2px 8px', borderRadius: '4px', fontWeight: '700' }}>
+                      Cart & Wishlist
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+                    cartReducer, wishlistReducer, Thunk Async Offers & DevTools
+                  </p>
+                </div>
+              </div>
+
+              {/* Navigation Tabs */}
+              <nav style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  onClick={() => setActiveTab('shop')}
+                  style={{
+                    backgroundColor: activeTab === 'shop' ? '#4f46e5' : '#1e293b',
+                    color: activeTab === 'shop' ? '#ffffff' : '#94a3b8',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: activeTab === 'shop' ? '700' : '500'
+                  }}
+                >
+                  🛍️ Products ({INITIAL_PRODUCTS.length})
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('wishlist')}
+                  style={{
+                    backgroundColor: activeTab === 'wishlist' ? '#db2777' : '#1e293b',
+                    color: activeTab === 'wishlist' ? '#ffffff' : '#94a3b8',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: activeTab === 'wishlist' ? '700' : '500',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  ❤️ Wishlist
+                  <span style={{ backgroundColor: '#be185d', color: '#fff', padding: '1px 6px', borderRadius: '10px', fontSize: '11px', fontWeight: '800' }}>
+                    {reduxState.wishlist.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('cart')}
+                  style={{
+                    backgroundColor: activeTab === 'cart' ? '#059669' : '#1e293b',
+                    color: activeTab === 'cart' ? '#ffffff' : '#94a3b8',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: activeTab === 'cart' ? '700' : '500',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  🛒 Cart
+                  <span style={{ backgroundColor: '#047857', color: '#fff', padding: '1px 6px', borderRadius: '10px', fontSize: '11px', fontWeight: '800' }}>
+                    {cartItemCount}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('devtools')}
+                  style={{
+                    backgroundColor: activeTab === 'devtools' ? '#7c3aed' : '#1e293b',
+                    color: activeTab === 'devtools' ? '#ffffff' : '#94a3b8',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: activeTab === 'devtools' ? '700' : '500'
+                  }}
+                >
+                  🔍 DevTools Inspector
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('docs')}
+                  style={{
+                    backgroundColor: activeTab === 'docs' ? '#2563eb' : '#1e293b',
+                    color: activeTab === 'docs' ? '#ffffff' : '#94a3b8',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: activeTab === 'docs' ? '700' : '500'
+                  }}
+                >
+                  📖 Assignment Q1-Q5
+                </button>
+              </nav>
+
+            </div>
+          </header>
+
+          {/* Offers Marquee Banner (Q4: Redux Thunk Async Offers) */}
+          <div style={{ backgroundColor: '#1e1b4b', borderBottom: '1px solid #3730a3', padding: '10px 16px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '18px' }}>⚡</span>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: '#c7d2fe' }}>
+                  Async Thunk Offers API (Q4):
+                </span>
+                {reduxState.offers.loading ? (
+                  <span style={{ fontSize: '12px', color: '#fcd34d', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="animate-spin" style={{ display: 'inline-block' }}>⏳</span> Fetching discount offers from API (setTimeout)...
+                  </span>
+                ) : reduxState.offers.items.length > 0 ? (
+                  <span style={{ fontSize: '12px', color: '#34d399', fontWeight: '600' }}>
+                    {reduxState.offers.items.length} Discount Offers Live! ({reduxState.offers.items[0].title})
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    No offers loaded yet. Click button to dispatch async <code>fetchOffers()</code> action.
+                  </span>
+                )}
+              </div>
+
+              <button
+                onClick={handleFetchOffers}
+                disabled={reduxState.offers.loading}
+                style={{
+                  backgroundColor: '#4338ca',
+                  color: '#ffffff',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  boxShadow: '0 2px 8px rgba(67, 56, 202, 0.4)'
+                }}
+              >
+                {reduxState.offers.loading ? 'Fetching...' : '🚀 Dispatch fetchOffers()'}
+              </button>
+            </div>
+          </div>
+
+          {/* Main Body */}
+          <main style={{ flex: 1, maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '24px 16px' }}>
+
+            {/* TAB: SHOP PRODUCTS (Q2: ProductCard with Add & Remove Buttons) */}
+            {activeTab === 'shop' && (
+              <div>
+                {/* Section Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+                  <div>
+                    <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#ffffff', margin: 0 }}>
+                      Featured Tech Store (ProductCard Component)
+                    </h2>
+                    <p style={{ fontSize: '13px', color: '#94a3b8', margin: '4px 0 0 0' }}>
+                      Dispatching <code>addToCart</code> and <code>removeFromCart</code> actions directly from ProductCard buttons.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ backgroundColor: '#111827', padding: '6px 12px', borderRadius: '6px', border: '1px solid #1f2937', fontSize: '12px', color: '#cbd5e1' }}>
+                      🛒 Cart Items: <strong style={{ color: '#10b981' }}>{cartItemCount}</strong>
+                    </div>
+                    <div style={{ backgroundColor: '#111827', padding: '6px 12px', borderRadius: '6px', border: '1px solid #1f2937', fontSize: '12px', color: '#cbd5e1' }}>
+                      ❤️ Wishlist: <strong style={{ color: '#ec4899' }}>{reduxState.wishlist.length}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Display Fetched Offers if available (Q4) */}
+                {reduxState.offers.items.length > 0 && (
+                  <div className="animate-fadeIn" style={{ marginBottom: '24px', backgroundColor: '#0f172a', border: '1px solid #312e81', borderRadius: '10px', padding: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '18px' }}>🎟️</span>
+                      <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#a5b4fc', margin: 0 }}>
+                        Active Thunk Discount Coupons (Dispatched via redux-thunk):
+                      </h4>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
+                      {reduxState.offers.items.map(offer => (
+                        <div key={offer.id} style={{ backgroundColor: '#1e1b4b', border: '1px dashed #6366f1', borderRadius: '8px', padding: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <span style={{ fontSize: '11px', backgroundColor: '#4338ca', color: '#e0e7ff', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                              {offer.badge}
+                            </span>
+                            <span style={{ fontSize: '11px', color: '#f43f5e', fontWeight: '600' }}>{offer.expiry}</span>
+                          </div>
+                          <div style={{ fontSize: '13px', fontWeight: '700', color: '#ffffff', margin: '8px 0 4px 0' }}>{offer.title}</div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                            <code style={{ backgroundColor: '#090d16', color: '#38bdf8', padding: '3px 8px', borderRadius: '4px', fontSize: '12px' }}>
+                              {offer.code}
+                            </code>
+                            <button
+                              onClick={() => {
+                                setAppliedPromo(offer.code);
+                                showToast(`🎉 Coupon ${offer.code} Applied (15% Off)!`, 'info');
+                              }}
+                              style={{
+                                backgroundColor: appliedPromo === offer.code ? '#059669' : '#312e81',
+                                color: '#ffffff',
+                                padding: '4px 10px',
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                fontWeight: '700'
+                              }}
+                            >
+                              {appliedPromo === offer.code ? 'Applied ✅' : 'Apply Coupon'}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Product Cards Grid (Q2: ProductCard with Add & Remove buttons) */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                  {INITIAL_PRODUCTS.map(product => {
+                    const cartItem = reduxState.cart.find(item => item.id === product.id);
+                    const isWishlisted = reduxState.wishlist.some(item => item.id === product.id);
+
+                    return (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        cartItem={cartItem}
+                        isWishlisted={isWishlisted}
+                        onAddToCart={() => handleAddToCart(product)}
+                        onRemoveFromCart={() => handleRemoveFromCart(product.id)}
+                        onToggleWishlist={() => handleToggleWishlist(product)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: SHOPPING CART (Q1: cartReducer State Management) */}
+            {activeTab === 'cart' && (
+              <div className="animate-fadeIn">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#ffffff', margin: 0 }}>
+                      Shopping Cart (Managed by cartReducer)
+                    </h2>
+                    <p style={{ fontSize: '13px', color: '#94a3b8', margin: '4px 0 0 0' }}>
+                      Current state managed in <code>state.cart</code> array using Redux immutability.
+                    </p>
+                  </div>
+                  {reduxState.cart.length > 0 && (
+                    <button
+                      onClick={() => {
+                        store.dispatch(clearCart());
+                        showToast('Cart Cleared!', 'remove');
+                      }}
+                      style={{ backgroundColor: '#7f1d1d', color: '#fca5a5', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '700' }}
+                    >
+                      Clear Entire Cart 🗑️
+                    </button>
+                  )}
+                </div>
+
+                {reduxState.cart.length === 0 ? (
+                  <div className="glass-card" style={{ padding: '60px 20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>🛒</div>
+                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>Your Shopping Cart is Empty</h3>
+                    <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '20px' }}>
+                      Dispatch <code>addToCart</code> action from the Products page to add items here.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('shop')}
+                      style={{ backgroundColor: '#4f46e5', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '700' }}
+                    >
+                      Explore Products 🛍️
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+                    
+                    {/* Cart Items List */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {reduxState.cart.map(item => (
+                        <div key={item.id} className="glass-card" style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+                            <div style={{ width: '50px', height: '50px', borderRadius: '8px', backgroundColor: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', flexShrink: 0 }}>
+                              {item.image}
+                            </div>
+                            <div style={{ minWidth: 0 }}>
+                              <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {item.name}
+                              </h4>
+                              <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
+                                ₹{item.price.toLocaleString('en-IN')} × {item.quantity} = <strong style={{ color: '#10b981' }}>₹{(item.price * item.quantity).toLocaleString('en-IN')}</strong>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {/* Quantity Controls */}
+                            <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1e293b', borderRadius: '6px', border: '1px solid #334155' }}>
+                              <button
+                                onClick={() => store.dispatch(updateQuantity(item.id, item.quantity - 1))}
+                                style={{ width: '28px', height: '28px', color: '#cbd5e1', fontSize: '14px', background: 'transparent' }}
+                              >
+                                -
+                              </button>
+                              <span style={{ padding: '0 8px', fontSize: '12px', fontWeight: '700', color: '#fff' }}>
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => store.dispatch(updateQuantity(item.id, item.quantity + 1))}
+                                style={{ width: '28px', height: '28px', color: '#cbd5e1', fontSize: '14px', background: 'transparent' }}
+                              >
+                                +
+                              </button>
+                            </div>
+
+                            <button
+                              onClick={() => handleRemoveFromCart(item.id)}
+                              title="Remove item"
+                              style={{ width: '32px', height: '32px', borderRadius: '6px', backgroundColor: '#374151', color: '#f87171', fontSize: '14px' }}
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Order Summary Card */}
+                    <div className="glass-card" style={{ padding: '24px', height: 'fit-content' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', marginBottom: '16px', borderBottom: '1px solid #1f2937', paddingBottom: '10px' }}>
+                        Order Summary
+                      </h3>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                          <span>Subtotal ({cartItemCount} items):</span>
+                          <span style={{ color: '#f3f4f6', fontWeight: '600' }}>₹{subtotal.toLocaleString('en-IN')}</span>
+                        </div>
+
+                        {appliedPromo && (
+                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#34d399' }}>
+                            <span>Promo Discount ({appliedPromo} - 15%):</span>
+                            <span>-₹{discount.toLocaleString('en-IN')}</span>
+                          </div>
+                        )}
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                          <span>Estimated GST (18%):</span>
+                          <span style={{ color: '#f3f4f6', fontWeight: '600' }}>₹{(total * 0.18).toLocaleString('en-IN')}</span>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                          <span>Standard Shipping:</span>
+                          <span style={{ color: '#10b981', fontWeight: '700' }}>FREE</span>
+                        </div>
+
+                        <div style={{ borderTop: '1px solid #374151', paddingTop: '12px', marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: '800' }}>
+                          <span style={{ color: '#ffffff' }}>Total Amount:</span>
+                          <span style={{ color: '#38bdf8' }}>₹{(total * 1.18).toLocaleString('en-IN')}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => showToast('🎉 Order Placed! Redux Store Updated.', 'info')}
+                        style={{
+                          width: '100%',
+                          marginTop: '20px',
+                          backgroundColor: '#059669',
+                          color: '#ffffff',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          boxShadow: '0 4px 12px rgba(5, 150, 105, 0.4)'
+                        }}
+                      >
+                        Proceed to Checkout 💳
+                      </button>
+                    </div>
+
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB: WISHLIST (Q3: wishlistReducer State Management) */}
+            {activeTab === 'wishlist' && (
+              <div className="animate-fadeIn">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <div>
+                    <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#ffffff', margin: 0 }}>
+                      My Wishlist (Managed by wishlistReducer)
+                    </h2>
+                    <p style={{ fontSize: '13px', color: '#94a3b8', margin: '4px 0 0 0' }}>
+                      Combined alongside cartReducer using Redux <code>combineReducers</code>.
+                    </p>
+                  </div>
+                </div>
+
+                {reduxState.wishlist.length === 0 ? (
+                  <div className="glass-card" style={{ padding: '60px 20px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>💔</div>
+                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '8px' }}>Your Wishlist is Empty</h3>
+                    <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '20px' }}>
+                      Click the heart button on any ProductCard to save items to your Redux wishlist state.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab('shop')}
+                      style={{ backgroundColor: '#db2777', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '700' }}
+                    >
+                      Browse Products ❤️
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                    {reduxState.wishlist.map(item => (
+                      <div key={item.id} className="glass-card glass-card-hover" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '32px' }}>{item.image}</span>
+                          <button
+                            onClick={() => handleToggleWishlist(item)}
+                            title="Remove from wishlist"
+                            style={{ backgroundColor: '#831843', color: '#f472b6', width: '30px', height: '30px', borderRadius: '50%', fontSize: '14px' }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <div>
+                          <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#ffffff', margin: 0 }}>{item.name}</h4>
+                          <div style={{ fontSize: '14px', color: '#38bdf8', fontWeight: '800', marginTop: '6px' }}>
+                            ₹{item.price.toLocaleString('en-IN')}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            handleAddToCart(item);
+                            handleToggleWishlist(item); // Move from wishlist to cart
+                          }}
+                          style={{
+                            width: '100%',
+                            backgroundColor: '#4f46e5',
+                            color: '#ffffff',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            marginTop: 'auto'
+                          }}
+                        >
+                          Move to Cart 🛒
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB: REDUX DEVTOOLS INSPECTOR (Q5: DevTools Tracking & Screenshot Helper) */}
+            {activeTab === 'devtools' && (
+              <div className="animate-fadeIn">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+                  <div>
+                    <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#ffffff', margin: 0 }}>
+                      🔍 Redux DevTools Extension Inspector & State Tracker
+                    </h2>
+                    <p style={{ fontSize: '13px', color: '#94a3b8', margin: '4px 0 0 0' }}>
+                      Track dispatched actions, previous state vs next state diffs, and inspect combined Redux tree.
+                    </p>
+                  </div>
+
+                  <div style={{ backgroundColor: '#1e1b4b', border: '1px solid #4338ca', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', color: '#a5b4fc' }}>
+                    🟢 Window Compose Extension: <strong>ACTIVE</strong>
+                  </div>
+                </div>
+
+                {/* DevTools Chrome Extension Guide */}
+                <div style={{ backgroundColor: '#0f172a', borderRadius: '10px', border: '1px solid #1e293b', padding: '16px', marginBottom: '20px' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#38bdf8', marginBottom: '10px' }}>
+                    📸 How to Track & Screenshot State Changes in Chrome Redux DevTools:
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', fontSize: '12px' }}>
+                    <div style={{ backgroundColor: '#1e293b', padding: '12px', borderRadius: '8px' }}>
+                      <strong style={{ color: '#a78bfa' }}>1. Open Chrome DevTools:</strong> Press <kbd style={{ background: '#334155', padding: '2px 6px', borderRadius: '4px' }}>F12</kbd> in your browser and click on the <strong>Redux</strong> tab.
+                    </div>
+                    <div style={{ backgroundColor: '#1e293b', padding: '12px', borderRadius: '8px' }}>
+                      <strong style={{ color: '#a78bfa' }}>2. Dispatch Actions:</strong> Click "Add to Cart" or "Wishlist" buttons on the Products tab.
+                    </div>
+                    <div style={{ backgroundColor: '#1e293b', padding: '12px', borderRadius: '8px' }}>
+                      <strong style={{ color: '#a78bfa' }}>3. View Action Timeline:</strong> Observe <code>ADD_TO_CART</code>, <code>REMOVE_FROM_CART</code>, and <code>FETCH_OFFERS_SUCCESS</code> appear in the action list.
+                    </div>
+                    <div style={{ backgroundColor: '#1e293b', padding: '12px', borderRadius: '8px' }}>
+                      <strong style={{ color: '#a78bfa' }}>4. State Tree & Diff:</strong> Click on <strong>Diff</strong> tab to see green additions (+) and red deletions (-). Take a screenshot!
+                    </div>
+                  </div>
+                </div>
+
+                {/* Live Real-Time Action Log & State Tree */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                  
+                  {/* Action Log Stream */}
+                  <div className="glass-card" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#fff', margin: 0 }}>
+                        Dispatched Actions Stream ({actionHistory.length})
+                      </h4>
+                      <span style={{ fontSize: '11px', color: '#94a3b8' }}>Latest at top</span>
+                    </div>
+
+                    <div style={{ maxHeight: '420px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {actionHistory.length === 0 ? (
+                        <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280', fontSize: '12px' }}>
+                          No actions dispatched yet. Add or remove items from the store to generate action logs.
+                        </div>
+                      ) : (
+                        actionHistory.map((entry, idx) => (
+                          <div key={idx} style={{ backgroundColor: '#090d16', border: '1px solid #1e293b', borderRadius: '6px', padding: '10px', fontSize: '12px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                              <span style={{
+                                fontWeight: '700',
+                                color: entry.type === 'ADD_TO_CART' ? '#10b981' : entry.type === 'REMOVE_FROM_CART' ? '#ef4444' : entry.type.includes('OFFERS') ? '#818cf8' : '#ec4899'
+                              }}>
+                                ⚡ {entry.type}
+                              </span>
+                              <span style={{ fontSize: '11px', color: '#64748b' }}>{entry.time}</span>
+                            </div>
+                            {entry.payload && (
+                              <pre style={{ backgroundColor: '#030712', padding: '6px', borderRadius: '4px', fontSize: '11px', color: '#93c5fd', overflowX: 'auto', margin: 0 }}>
+{JSON.stringify(entry.payload, null, 2)}
+                              </pre>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Current Global Redux State Tree */}
+                  <div className="glass-card" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#fff', margin: 0 }}>
+                        Current Combined Redux State Tree (rootReducer)
+                      </h4>
+                      <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '700' }}>LIVE SYNC</span>
+                    </div>
+
+                    <pre style={{
+                      backgroundColor: '#030712',
+                      border: '1px solid #1f2937',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      fontSize: '12px',
+                      color: '#a7f3d0',
+                      maxHeight: '420px',
+                      overflowY: 'auto',
+                      lineHeight: 1.4
+                    }}>
+{JSON.stringify(reduxState, null, 2)}
+                    </pre>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* TAB: ASSIGNMENT DOCUMENTATION (Q1 to Q5 Comprehensive Answers) */}
+            {activeTab === 'docs' && (
+              <div className="animate-fadeIn glass-card" style={{ padding: '24px' }}>
+                <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#ffffff', marginBottom: '16px' }}>
+                  📖 Assignment Solutions Summary (Q1 to Q5)
+                </h2>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  
+                  {/* Q1 Summary */}
+                  <div style={{ backgroundColor: '#0f172a', borderRadius: '8px', padding: '16px', border: '1px solid #1e293b' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#312e81', color: '#c7d2fe', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                      QUESTION 1
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', margin: '6px 0' }}>
+                      cartReducer Implementation (Array of Items)
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: 1.5 }}>
+                      Implemented <code>cartReducer(state = [], action)</code> that handles an array of shopping cart items. Handles <code>ADD_TO_CART</code> (increments quantity if already exists or adds item) and <code>REMOVE_FROM_CART</code> (filters out item).
+                    </p>
+                  </div>
+
+                  {/* Q2 Summary */}
+                  <div style={{ backgroundColor: '#0f172a', borderRadius: '8px', padding: '16px', border: '1px solid #1e293b' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#312e81', color: '#c7d2fe', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                      QUESTION 2
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', margin: '6px 0' }}>
+                      ProductCard Component with Two Buttons
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: 1.5 }}>
+                      Constructed <code>ProductCard</code> component with two distinct action buttons: "+ Add to Cart" (dispatches <code>addToCart</code>) and "- Remove" (dispatches <code>removeFromCart</code>), showing in-cart quantity badges.
+                    </p>
+                  </div>
+
+                  {/* Q3 Summary */}
+                  <div style={{ backgroundColor: '#0f172a', borderRadius: '8px', padding: '16px', border: '1px solid #1e293b' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#312e81', color: '#c7d2fe', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                      QUESTION 3
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', margin: '6px 0' }}>
+                      combineReducers for Cart and Wishlist
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: 1.5 }}>
+                      Merged <code>cartReducer</code> and <code>wishlistReducer</code> using Redux's <code>{"combineReducers({ cart: cartReducer, wishlist: wishlistReducer, offers: offersReducer })"}</code> to keep state modular and separated.
+                    </p>
+                  </div>
+
+                  {/* Q4 Summary */}
+                  <div style={{ backgroundColor: '#0f172a', borderRadius: '8px', padding: '16px', border: '1px solid #1e293b' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#312e81', color: '#c7d2fe', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                      QUESTION 4
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', margin: '6px 0' }}>
+                      Redux-Thunk Middleware & fetchOffers Async Action
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: 1.5 }}>
+                      Configured <code>redux-thunk</code> middleware in store setup. Created <code>fetchOffers()</code> async action creator utilizing <code>setTimeout</code> to simulate an API request and dispatch <code>FETCH_OFFERS_START</code> & <code>FETCH_OFFERS_SUCCESS</code>.
+                    </p>
+                  </div>
+
+                  {/* Q5 Summary */}
+                  <div style={{ backgroundColor: '#0f172a', borderRadius: '8px', padding: '16px', border: '1px solid #1e293b' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#312e81', color: '#c7d2fe', padding: '2px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                      QUESTION 5
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', margin: '6px 0' }}>
+                      Redux DevTools Extension Setup & Tracking
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: 1.5 }}>
+                      Connected Redux store to browser extension using <code>window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__</code>. Also embedded an in-app visual action tracker & state tree inspector for comprehensive verification.
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {/* Footer */}
+          <footer style={{ backgroundColor: '#090d16', borderTop: '1px solid #1f2937', padding: '20px 16px', textAlign: 'center', fontSize: '13px', color: '#6b7280', marginTop: 'auto' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <strong>Capstone Mini Project</strong> — Redux Reducer Assignment (Cart, Wishlist, Thunk & DevTools)
+              </div>
+              <div style={{ display: 'flex', gap: '14px' }}>
+                <span>✅ Q1: cartReducer</span>
+                <span>✅ Q2: ProductCard Buttons</span>
+                <span>✅ Q3: combineReducers</span>
+                <span>✅ Q4: redux-thunk</span>
+                <span>✅ Q5: Redux DevTools</span>
+              </div>
+            </div>
+          </footer>
+
+        </div>
+      );
+    }
+
+    // =========================================================================
+    // 7. PRODUCT CARD COMPONENT (Q2 Requirement)
+    // =========================================================================
+    function ProductCard({ product, cartItem, isWishlisted, onAddToCart, onRemoveFromCart, onToggleWishlist }) {
+      return (
+        <div className="glass-card glass-card-hover" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px', position: 'relative' }}>
+          
+          {/* Top Badge & Wishlist Heart */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', backgroundColor: '#1e1b4b', color: '#a5b4fc', border: '1px solid #3730a3', padding: '2px 8px', borderRadius: '4px', fontWeight: '700' }}>
+              {product.tag}
+            </span>
+            <button
+              onClick={onToggleWishlist}
+              title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                backgroundColor: isWishlisted ? 'rgba(236, 72, 153, 0.2)' : '#1e293b',
+                color: isWishlisted ? '#ec4899' : '#94a3b8',
+                border: isWishlisted ? '1px solid #ec4899' : '1px solid #334155',
+                fontSize: '16px'
+              }}
+            >
+              {isWishlisted ? '❤️' : '🤍'}
+            </button>
+          </div>
+
+          {/* Product Icon & Visual */}
+          <div style={{ height: '110px', backgroundColor: '#0f172a', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '54px' }}>
+            {product.image}
+          </div>
+
+          {/* Product Info */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <span style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.05em' }}>
+                {product.category}
+              </span>
+              <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: '700' }}>
+                ★ {product.rating}
+              </span>
+            </div>
+            <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', lineHeight: 1.4, margin: '4px 0 8px 0', minHeight: '42px' }}>
+              {product.name}
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '18px', fontWeight: '800', color: '#38bdf8' }}>
+                ₹{product.price.toLocaleString('en-IN')}
+              </span>
+              {cartItem && (
+                <span style={{ fontSize: '11px', backgroundColor: '#065f46', color: '#6ee7b7', padding: '2px 8px', borderRadius: '4px', fontWeight: '700' }}>
+                  In Cart: {cartItem.quantity}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Q2: Two Buttons (Add to Cart & Remove from Cart) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: 'auto', paddingTop: '6px' }}>
+            
+            {/* Button 1: Add to Cart */}
+            <button
+              onClick={onAddToCart}
+              style={{
+                backgroundColor: '#4f46e5',
+                color: '#ffffff',
+                padding: '9px 12px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '700',
+                boxShadow: '0 2px 6px rgba(79, 70, 229, 0.4)'
+              }}
+            >
+              + Add to Cart
+            </button>
+
+            {/* Button 2: Remove from Cart */}
+            <button
+              onClick={onRemoveFromCart}
+              disabled={!cartItem}
+              style={{
+                backgroundColor: cartItem ? '#ef4444' : '#1e293b',
+                color: cartItem ? '#ffffff' : '#64748b',
+                padding: '9px 12px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '700',
+                cursor: cartItem ? 'pointer' : 'not-allowed',
+                border: '1px solid',
+                borderColor: cartItem ? '#dc2626' : '#334155'
+              }}
+            >
+              - Remove
+            </button>
+
+          </div>
+
+        </div>
+      );
+    }
+
+    // Render into root
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

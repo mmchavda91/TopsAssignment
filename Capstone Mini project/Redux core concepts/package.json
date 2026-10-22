@@ -1,0 +1,23 @@
+{
+  "name": "redux-core-concepts-spotify-playlist",
+  "version": "1.0.0",
+  "description": "Redux Core Concepts: Actions, playlistReducer, createStore, Provider & useSelector, removeSong (Q1 to Q5)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "addSong",
+    "removeSong",
+    "playlistReducer",
+    "createStore",
+    "useSelector",
+    "provider",
+    "spotify"
+  ],
+  "author": "Mamta",
+  "license": "ISC"
+}

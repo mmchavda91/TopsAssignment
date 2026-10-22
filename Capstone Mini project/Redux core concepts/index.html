@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Redux Core Concepts: Actions, playlistReducer, createStore, react-redux Provider & useSelector, removeSong (Q1 to Q5)" />
+  <title>Redux Core Concepts: Spotify Playlist App (Q1 - Q5)</title>
+
+  <!-- Google Fonts: Circular Spotify / Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- React 18, ReactDOM, Redux 4.2 & React-Redux 8 via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/redux@4.2.1/dist/redux.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-redux@8.1.3/dist/react-redux.min.js"></script>
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Spotify-Themed Modern Dark Styling & CSS Reset -->
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0c0f14;
+      color: #ffffff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Spotify Custom Green Scrollbar */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #1db954 #121212;
+    }
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #121212; }
+    ::-webkit-scrollbar-thumb { background: #1db954; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #1ed760; }
+
+    button {
+      font-family: inherit;
+      font-size: 100%;
+      line-height: 1.15;
+      margin: 0;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    button::-moz-focus-inner { border: 0; padding: 0; }
+
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+
+    /* Spotify Cards */
+    .spotify-card {
+      background: #181818;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      transition: all 0.25s ease;
+    }
+    .spotify-card:hover {
+      background: #282828;
+      border-color: rgba(29, 185, 84, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .spotify-btn-green {
+      background-color: #1db954;
+      color: #000000;
+      font-weight: 700;
+      border-radius: 500px;
+      padding: 10px 24px;
+      letter-spacing: 0.02em;
+    }
+    .spotify-btn-green:hover {
+      background-color: #1ed760;
+      transform: scale(1.03);
+      box-shadow: 0 4px 14px rgba(29, 185, 84, 0.4);
+    }
+
+    /* Audio Equalizer animation */
+    @keyframes barWave {
+      0%, 100% { height: 4px; }
+      50% { height: 18px; }
+    }
+    .eq-bar {
+      width: 3px;
+      background-color: #1db954;
+      border-radius: 2px;
+      display: inline-block;
+      animation: barWave 1.2s ease-in-out infinite;
+    }
+    .eq-bar:nth-child(2) { animation-delay: 0.2s; }
+    .eq-bar:nth-child(3) { animation-delay: 0.4s; }
+    .eq-bar:nth-child(4) { animation-delay: 0.1s; }
+
+    /* Fade-in */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React & Redux Application Script -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { createStore } = Redux;
+    const { Provider, useSelector, useDispatch } = ReactRedux;
+
+    // =========================================================================
+    // 1. ACTION TYPES & ACTION CREATORS (Q1 & Q5)
+    // =========================================================================
+    const ADD_SONG = 'ADD_SONG';
+    const REMOVE_SONG = 'REMOVE_SONG';
+    const CLEAR_PLAYLIST = 'CLEAR_PLAYLIST';
+
+    // Q1: Redux Action called addSong that takes song name as payload
+    const addSong = (songName) => ({
+      type: ADD_SONG,
+      payload: songName
+    });
+
+    // Q5: Redux Action called removeSong that takes song name as payload
+    const removeSong = (songName) => ({
+      type: REMOVE_SONG,
+      payload: songName
+    });
+
+    const clearPlaylist = () => ({
+      type: CLEAR_PLAYLIST
+    });
+
+    // =========================================================================
+    // 2. REDUCER: playlistReducer (Q2 & Q5)
+    // =========================================================================
+    const initialPlaylist = [];
+
+    // Action logs tracker to visualize Redux state flow live on screen
+    const stateAuditLogs = [];
+
+    function playlistReducer(state = initialPlaylist, action) {
+      switch (action.type) {
+        case ADD_SONG: {
+          // Avoid duplicate song addition
+          if (state.includes(action.payload)) {
+            return state;
+          }
+          // Immutable addition (spread operator)
+          return [...state, action.payload];
+        }
+
+        case REMOVE_SONG: {
+          // Q5: Uses filter method to remove song from playlist array
+          return state.filter(song => song !== action.payload);
+        }
+
+        case CLEAR_PLAYLIST:
+          return [];
+
+        default:
+          return state;
+      }
+    }
+
+    // =========================================================================
+    // 3. STORE SETUP & INITIAL DISPATCH (Q3: 'Kesariya' and 'Shape of You')
+    // =========================================================================
+    // Set up Redux store using createStore from redux
+    const store = createStore(playlistReducer);
+
+    // Track dispatch calls for UI terminal log
+    const originalDispatch = store.dispatch;
+    store.dispatch = function(action) {
+      const prev = store.getState();
+      const res = originalDispatch.apply(store, arguments);
+      const next = store.getState();
+      stateAuditLogs.unshift({
+        time: new Date().toLocaleTimeString(),
+        type: action.type,
+        payload: action.payload,
+        prev,
+        next
+      });
+      return res;
+    };
+
+    // Q3 Requirement: Dispatch two addSong actions to add 'Kesariya' and 'Shape of You'
+    store.dispatch(addSong('Kesariya'));
+    store.dispatch(addSong('Shape of You'));
+
+    // Q3 Requirement: Log the updated state to console
+    console.log('✅ Q3 Initial Redux State (store.getState()):', store.getState());
+
+    // =========================================================================
+    // 4. REACT APPLICATION (Q4: Integrated using Provider & useSelector)
+    // =========================================================================
+    function SpotifyPlaylistApp() {
+      // Q4: Extract songs array from Redux state using useSelector
+      const playlist = useSelector(state => state);
+      // Redux dispatch hook
+      const dispatch = useDispatch();
+
+      const [inputSong, setInputSong] = useState('');
+      const [nowPlaying, setNowPlaying] = useState(playlist[0] || 'Kesariya');
+      const [isPlaying, setIsPlaying] = useState(true);
+      const [activeTab, setActiveTab] = useState('app'); // 'app' | 'logs' | 'docs'
+      const [toastMessage, setToastMessage] = useState(null);
+
+      const showToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(null), 2500);
+      };
+
+      // Handler for Adding Song (Q1 & Q4)
+      const handleAddSong = (name) => {
+        const songToAdd = name || inputSong.trim();
+        if (!songToAdd) return;
+
+        if (playlist.includes(songToAdd)) {
+          showToast(`⚠️ "${songToAdd}" is already in playlist!`);
+          return;
+        }
+
+        dispatch(addSong(songToAdd));
+        setInputSong('');
+        showToast(`🎶 Added "${songToAdd}" to Spotify Playlist!`);
+      };
+
+      // Handler for Removing Song (Q5)
+      const handleRemoveSong = (songName) => {
+        dispatch(removeSong(songName));
+        showToast(`🗑️ Removed "${songName}" from playlist`);
+        if (nowPlaying === songName && playlist.length > 1) {
+          const remaining = playlist.filter(s => s !== songName);
+          setNowPlaying(remaining[0] || '');
+        }
+      };
+
+      // Metadata lookup for popular tracks
+      const getTrackMeta = (name) => {
+        const catalog = {
+          'Kesariya': { artist: 'Arijit Singh, Pritam', album: 'Brahmastra', duration: '4:28', cover: '🧡' },
+          'Shape of You': { artist: 'Ed Sheeran', album: '÷ (Divide)', duration: '3:53', cover: '💙' },
+          'Blinding Lights': { artist: 'The Weeknd', album: 'After Hours', duration: '3:20', cover: '🔴' },
+          'Starboy': { artist: 'The Weeknd, Daft Punk', album: 'Starboy', duration: '3:50', cover: '⚡' },
+          'Chaleya': { artist: 'Arijit Singh, Shilpa Rao', album: 'Jawan', duration: '3:20', cover: '✨' },
+          'Levitating': { artist: 'Dua Lipa', album: 'Future Nostalgia', duration: '3:23', cover: '💜' }
+        };
+        return catalog[name] || { artist: 'Indie Artist', album: 'Redux Single', duration: '3:15', cover: '🎵' };
+      };
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0c0f14' }}>
+          
+          {/* Toast Notification */}
+          {toastMessage && (
+            <div className="animate-fadeIn" style={{
+              position: 'fixed',
+              top: '20px',
+              right: '20px',
+              backgroundColor: '#1db954',
+              color: '#000000',
+              padding: '12px 20px',
+              borderRadius: '500px',
+              fontSize: '13px',
+              fontWeight: '800',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
+              zIndex: 99999,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <span>{toastMessage}</span>
+            </div>
+          )}
+
+          {/* Top Spotify Header */}
+          <header style={{ backgroundColor: '#05070a', borderBottom: '1px solid #1a1e26', position: 'sticky', top: 0, zIndex: 100 }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+              
+              {/* Spotify Logo & Brand */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#1db954', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 4px 16px rgba(29, 185, 84, 0.4)' }}>
+                  🎧
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h1 style={{ fontSize: '18px', fontWeight: '900', color: '#ffffff', margin: 0, letterSpacing: '-0.02em' }}>
+                      Spotify Redux Player
+                    </h1>
+                    <span style={{ fontSize: '11px', backgroundColor: 'rgba(29, 185, 84, 0.15)', color: '#1db954', border: '1px solid #1db954', padding: '2px 8px', borderRadius: '500px', fontWeight: '800' }}>
+                      Redux Core Concepts
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#a0aab8', margin: 0 }}>
+                    addSong • playlistReducer • createStore • Provider & useSelector • removeSong
+                  </p>
+                </div>
+              </div>
+
+              {/* Navigation Tabs */}
+              <nav style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => setActiveTab('app')}
+                  style={{
+                    backgroundColor: activeTab === 'app' ? '#1db954' : '#1e2430',
+                    color: activeTab === 'app' ? '#000000' : '#ffffff',
+                    padding: '8px 16px',
+                    borderRadius: '500px',
+                    fontSize: '13px',
+                    fontWeight: '700'
+                  }}
+                >
+                  🎵 Playlist ({playlist.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab('logs')}
+                  style={{
+                    backgroundColor: activeTab === 'logs' ? '#1db954' : '#1e2430',
+                    color: activeTab === 'logs' ? '#000000' : '#ffffff',
+                    padding: '8px 16px',
+                    borderRadius: '500px',
+                    fontSize: '13px',
+                    fontWeight: '700'
+                  }}
+                >
+                  ⚡ Redux State Logs ({stateAuditLogs.length})
+                </button>
+                <button
+                  onClick={() => setActiveTab('docs')}
+                  style={{
+                    backgroundColor: activeTab === 'docs' ? '#1db954' : '#1e2430',
+                    color: activeTab === 'docs' ? '#000000' : '#ffffff',
+                    padding: '8px 16px',
+                    borderRadius: '500px',
+                    fontSize: '13px',
+                    fontWeight: '700'
+                  }}
+                >
+                  📖 Assignment Q1-Q5
+                </button>
+              </nav>
+
+            </div>
+          </header>
+
+          {/* Main Body */}
+          <main style={{ flex: 1, maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '24px 20px', paddingBottom: '120px' }}>
+
+            {/* TAB: PLAYLIST APP (Q1 to Q5 Practical Implementation) */}
+            {activeTab === 'app' && (
+              <div className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                
+                {/* Hero Playlist Banner */}
+                <div style={{
+                  background: 'linear-gradient(180deg, #1e3a2b 0%, #121815 100%)',
+                  borderRadius: '16px',
+                  padding: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '24px',
+                  flexWrap: 'wrap',
+                  border: '1px solid rgba(29, 185, 84, 0.2)',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+                }}>
+                  <div style={{ width: '130px', height: '130px', borderRadius: '12px', background: 'linear-gradient(135deg, #1db954 0%, #104825 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '64px', boxShadow: '0 10px 25px rgba(0,0,0,0.6)' }}>
+                    🎶
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: '240px' }}>
+                    <span style={{ fontSize: '12px', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.1em', color: '#1db954' }}>
+                      PUBLIC PLAYLIST • MANAGED BY REDUX STORE
+                    </span>
+                    <h2 style={{ fontSize: '32px', fontWeight: '900', color: '#ffffff', margin: '4px 0 8px 0', letterSpacing: '-0.02em' }}>
+                      My Top Hits 2026
+                    </h2>
+                    <p style={{ fontSize: '13px', color: '#b3b3b3', margin: 0 }}>
+                      State managed via <code>playlistReducer</code> • Initialized with <strong style={{ color: '#fff' }}>'Kesariya'</strong> and <strong style={{ color: '#fff' }}>'Shape of You'</strong> (Q3)
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '12px', fontSize: '12px', color: '#888' }}>
+                      <span>👤 Curated by Mamta</span>
+                      <span>•</span>
+                      <span style={{ color: '#1db954', fontWeight: '700' }}>{playlist.length} songs</span>
+                    </div>
+                  </div>
+
+                  {/* Play all button */}
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      onClick={() => setIsPlaying(!isPlaying)}
+                      className="spotify-btn-green"
+                      style={{ display: 'flex', gap: '8px', fontSize: '14px' }}
+                    >
+                      <span>{isPlaying ? '⏸️ Pause' : '▶️ Play Playlist'}</span>
+                    </button>
+                    {playlist.length > 0 && (
+                      <button
+                        onClick={() => {
+                          dispatch(clearPlaylist());
+                          showToast('Cleared all songs from playlist');
+                        }}
+                        style={{ backgroundColor: '#2a1a1a', color: '#ff6b6b', border: '1px solid #4a2020', padding: '10px 16px', borderRadius: '500px', fontSize: '12px', fontWeight: '700' }}
+                      >
+                        Clear All
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Add Song Input Form & Quick Adds (Q1 & Q4) */}
+                <div className="spotify-card" style={{ padding: '20px' }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#fff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>➕</span> Add Track to Playlist (Dispatches <code>addSong</code> Action)
+                  </h3>
+
+                  {/* Custom Song Input Form */}
+                  <form onSubmit={(e) => { e.preventDefault(); handleAddSong(); }} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      placeholder="Type a song title (e.g., 'Chaleya', 'Believer', 'Starboy')..."
+                      value={inputSong}
+                      onChange={(e) => setInputSong(e.target.value)}
+                      style={{
+                        flex: 1,
+                        minWidth: '240px',
+                        backgroundColor: '#282828',
+                        border: '1px solid #3e3e3e',
+                        borderRadius: '500px',
+                        padding: '12px 20px',
+                        color: '#fff',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                    <button
+                      type="submit"
+                      className="spotify-btn-green"
+                      style={{ fontSize: '13px', padding: '10px 22px' }}
+                    >
+                      + Add to Playlist
+                    </button>
+                  </form>
+
+                  {/* Quick Add Suggestions (1-Click Dispatch) */}
+                  <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '12px', color: '#888', fontWeight: '600' }}>Quick Add Suggestions:</span>
+                    {['Kesariya', 'Shape of You', 'Blinding Lights', 'Starboy', 'Chaleya', 'Levitating'].map((preset) => {
+                      const alreadyIn = playlist.includes(preset);
+                      return (
+                        <button
+                          key={preset}
+                          onClick={() => handleAddSong(preset)}
+                          disabled={alreadyIn}
+                          style={{
+                            backgroundColor: alreadyIn ? '#1c221e' : '#222831',
+                            color: alreadyIn ? '#1db954' : '#e0e0e0',
+                            border: alreadyIn ? '1px solid rgba(29, 185, 84, 0.4)' : '1px solid #333',
+                            padding: '5px 12px',
+                            borderRadius: '500px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            cursor: alreadyIn ? 'default' : 'pointer'
+                          }}
+                        >
+                          {alreadyIn ? '✓ ' + preset : '+ ' + preset}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Playlist Tracks Table (Q4: useSelector & Q5: removeSong Button) */}
+                <div className="spotify-card" style={{ padding: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #282828', paddingBottom: '12px' }}>
+                    <div style={{ fontSize: '12px', textTransform: 'uppercase', color: '#b3b3b3', fontWeight: '700', letterSpacing: '0.05em' }}>
+                      # • Title & Artist
+                    </div>
+                    <div style={{ fontSize: '12px', textTransform: 'uppercase', color: '#b3b3b3', fontWeight: '700', letterSpacing: '0.05em' }}>
+                      Action
+                    </div>
+                  </div>
+
+                  {playlist.length === 0 ? (
+                    <div style={{ padding: '40px 20px', textAlign: 'center', color: '#777' }}>
+                      <div style={{ fontSize: '40px', marginBottom: '10px' }}>📭</div>
+                      <p style={{ fontSize: '14px', color: '#aaa', margin: 0 }}>Your playlist is empty.</p>
+                      <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                        Click on "Kesariya" or "Shape of You" above to dispatch <code>addSong</code> action!
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {playlist.map((songName, index) => {
+                        const meta = getTrackMeta(songName);
+                        const isCurrent = nowPlaying === songName;
+
+                        return (
+                          <div
+                            key={songName}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '10px 14px',
+                              borderRadius: '8px',
+                              backgroundColor: isCurrent ? 'rgba(29, 185, 84, 0.1)' : 'transparent',
+                              border: isCurrent ? '1px solid rgba(29, 185, 84, 0.3)' : '1px solid transparent',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {/* Track Left: Index, Icon, Title, Artist */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+                              <span style={{ fontSize: '13px', color: isCurrent ? '#1db954' : '#666', fontWeight: '700', width: '20px', textAlign: 'center' }}>
+                                {isCurrent && isPlaying ? (
+                                  <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '14px' }}>
+                                    <span className="eq-bar"></span>
+                                    <span className="eq-bar"></span>
+                                    <span className="eq-bar"></span>
+                                  </div>
+                                ) : (
+                                  index + 1
+                                )}
+                              </span>
+
+                              <div style={{ width: '42px', height: '42px', borderRadius: '6px', backgroundColor: '#282828', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>
+                                {meta.cover}
+                              </div>
+
+                              <div style={{ minWidth: 0 }}>
+                                <div style={{ fontSize: '14px', fontWeight: '700', color: isCurrent ? '#1db954' : '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {songName}
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#888', marginTop: '2px' }}>
+                                  {meta.artist} • <span style={{ color: '#555' }}>{meta.album}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Track Right: Duration, Play & Q5 'Remove' Button */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <span style={{ fontSize: '12px', color: '#777', display: 'none' }} className="track-duration">
+                                {meta.duration}
+                              </span>
+
+                              {/* Play / Set Active button */}
+                              <button
+                                onClick={() => {
+                                  setNowPlaying(songName);
+                                  setIsPlaying(true);
+                                }}
+                                title="Play Track"
+                                style={{
+                                  backgroundColor: isCurrent && isPlaying ? '#1db954' : '#282828',
+                                  color: isCurrent && isPlaying ? '#000' : '#fff',
+                                  width: '32px',
+                                  height: '32px',
+                                  borderRadius: '50%',
+                                  fontSize: '13px'
+                                }}
+                              >
+                                {isCurrent && isPlaying ? '⏸️' : '▶️'}
+                              </button>
+
+                              {/* Q5: 'Remove' Button dispatching removeSong */}
+                              <button
+                                onClick={() => handleRemoveSong(songName)}
+                                title="Remove song from Redux playlist"
+                                style={{
+                                  backgroundColor: '#2a1a1a',
+                                  color: '#ff6b6b',
+                                  border: '1px solid #4a2020',
+                                  padding: '6px 12px',
+                                  borderRadius: '500px',
+                                  fontSize: '12px',
+                                  fontWeight: '700'
+                                }}
+                              >
+                                🗑️ Remove
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+
+            {/* TAB: REDUX TERMINAL LOGS & ACTION DISPATCH STREAM */}
+            {activeTab === 'logs' && (
+              <div className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#fff', margin: 0 }}>
+                      ⚡ Live Redux State & Action Stream (Q3 Requirement)
+                    </h3>
+                    <p style={{ fontSize: '12px', color: '#888', margin: '4px 0 0 0' }}>
+                      Real-time inspection of <code>store.getState()</code> and dispatched actions (<code>addSong</code> / <code>removeSong</code>).
+                    </p>
+                  </div>
+
+                  <div style={{ backgroundColor: '#181818', padding: '6px 14px', borderRadius: '500px', border: '1px solid #282828', fontSize: '12px' }}>
+                    Total Dispatched Actions: <strong style={{ color: '#1db954' }}>{stateAuditLogs.length}</strong>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                  
+                  {/* Current State Tree */}
+                  <div className="spotify-card" style={{ padding: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1db954' }}>
+                        ● CURRENT REDUX STATE (store.getState())
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#888' }}>Array[{playlist.length}]</span>
+                    </div>
+                    <pre style={{ backgroundColor: '#0c0f14', border: '1px solid #222', borderRadius: '8px', padding: '16px', fontSize: '13px', color: '#a7f3d0', overflowX: 'auto', lineHeight: 1.5 }}>
+{JSON.stringify(playlist, null, 2)}
+                    </pre>
+                  </div>
+
+                  {/* Actions History Stream */}
+                  <div className="spotify-card" style={{ padding: '20px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: '#fff', marginBottom: '12px', display: 'block' }}>
+                      ACTION DISPATCH TIMELINE
+                    </span>
+                    <div style={{ maxHeight: '350px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {stateAuditLogs.map((log, idx) => (
+                        <div key={idx} style={{ backgroundColor: '#0c0f14', border: '1px solid #282828', borderRadius: '8px', padding: '10px', fontSize: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <span style={{
+                              fontWeight: '800',
+                              color: log.type === 'ADD_SONG' ? '#1db954' : '#ff6b6b'
+                            }}>
+                              ⚡ {log.type}
+                            </span>
+                            <span style={{ fontSize: '11px', color: '#666' }}>{log.time}</span>
+                          </div>
+                          <div style={{ color: '#e0e0e0' }}>
+                            Payload: <strong style={{ color: '#38bdf8' }}>"{log.payload}"</strong>
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#888', marginTop: '4px' }}>
+                            Length: {log.prev.length} ➔ {log.next.length}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* TAB: ASSIGNMENT DOCUMENTATION (Q1 to Q5 Comprehensive Answers) */}
+            {activeTab === 'docs' && (
+              <div className="animate-fadeIn spotify-card" style={{ padding: '28px' }}>
+                <h2 style={{ fontSize: '22px', fontWeight: '900', color: '#ffffff', marginBottom: '20px' }}>
+                  📖 Redux Core Concepts Assignment Answers (Q1 to Q5)
+                </h2>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  
+                  {/* Q1 */}
+                  <div style={{ backgroundColor: '#121212', borderRadius: '10px', padding: '18px', border: '1px solid #282828' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#1db954', color: '#000', padding: '2px 8px', borderRadius: '500px', fontWeight: '800' }}>
+                      QUESTION 1
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#fff', margin: '8px 0 6px 0' }}>
+                      Redux Action Creator: addSong
+                    </h3>
+                    <p style={{ fontSize: '13px', color: '#b3b3b3', lineHeight: 1.5 }}>
+                      Created <code>addSong(songName)</code> action creator that accepts a track title as string payload and returns <code>{'{ type: "ADD_SONG", payload: songName }'}</code>.
+                    </p>
+                  </div>
+
+                  {/* Q2 */}
+                  <div style={{ backgroundColor: '#121212', borderRadius: '10px', padding: '18px', border: '1px solid #282828' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#1db954', color: '#000', padding: '2px 8px', borderRadius: '500px', fontWeight: '800' }}>
+                      QUESTION 2
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#fff', margin: '8px 0 6px 0' }}>
+                      playlistReducer Function & Sample Testing
+                    </h3>
+                    <p style={{ fontSize: '13px', color: '#b3b3b3', lineHeight: 1.5 }}>
+                      Implemented <code>playlistReducer(state = [], action)</code>. Upon receiving <code>ADD_SONG</code>, returns a new array <code>[...state, action.payload]</code> immutably.
+                    </p>
+                  </div>
+
+                  {/* Q3 */}
+                  <div style={{ backgroundColor: '#121212', borderRadius: '10px', padding: '18px', border: '1px solid #282828' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#1db954', color: '#000', padding: '2px 8px', borderRadius: '500px', fontWeight: '800' }}>
+                      QUESTION 3
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#fff', margin: '8px 0 6px 0' }}>
+                      Redux Store Setup & Dispatching 'Kesariya' and 'Shape of You'
+                    </h3>
+                    <p style={{ fontSize: '13px', color: '#b3b3b3', lineHeight: 1.5 }}>
+                      Initialized Redux store with <code>const store = createStore(playlistReducer)</code>. Dispatched <code>store.dispatch(addSong('Kesariya'))</code> and <code>store.dispatch(addSong('Shape of You'))</code> and verified updated state in console.
+                    </p>
+                  </div>
+
+                  {/* Q4 */}
+                  <div style={{ backgroundColor: '#121212', borderRadius: '10px', padding: '18px', border: '1px solid #282828' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#1db954', color: '#000', padding: '2px 8px', borderRadius: '500px', fontWeight: '800' }}>
+                      QUESTION 4
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#fff', margin: '8px 0 6px 0' }}>
+                      React-Redux Integration (Provider & useSelector)
+                    </h3>
+                    <p style={{ fontSize: '13px', color: '#b3b3b3', lineHeight: 1.5 }}>
+                      Wrapped React component tree with <code>&lt;Provider store={'{store}'}&gt;</code>. Used <code>const playlist = useSelector(state =&gt; state)</code> to subscribe directly to playlist updates and automatically re-render the song list.
+                    </p>
+                  </div>
+
+                  {/* Q5 */}
+                  <div style={{ backgroundColor: '#121212', borderRadius: '10px', padding: '18px', border: '1px solid #282828' }}>
+                    <span style={{ fontSize: '11px', backgroundColor: '#1db954', color: '#000', padding: '2px 8px', borderRadius: '500px', fontWeight: '800' }}>
+                      QUESTION 5
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#fff', margin: '8px 0 6px 0' }}>
+                      removeSong Action & Filter Reducer Refactor
+                    </h3>
+                    <p style={{ fontSize: '13px', color: '#b3b3b3', lineHeight: 1.5 }}>
+                      Created <code>removeSong(songName)</code> action. Refactored reducer using <code>state.filter(song =&gt; song !== action.payload)</code>. Added 'Remove' button next to each song in React component.
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {/* Spotify Fixed Bottom Player Bar */}
+          <footer style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: '#181818',
+            borderTop: '1px solid #282828',
+            padding: '12px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            zIndex: 1000,
+            boxShadow: '0 -5px 20px rgba(0,0,0,0.6)'
+          }}>
+            {/* Left: Current Track */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '180px' }}>
+              <div style={{ width: '46px', height: '46px', borderRadius: '6px', backgroundColor: '#282828', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
+                {getTrackMeta(nowPlaying).cover}
+              </div>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#fff' }}>
+                  {nowPlaying || 'No song playing'}
+                </div>
+                <div style={{ fontSize: '11px', color: '#b3b3b3' }}>
+                  {nowPlaying ? getTrackMeta(nowPlaying).artist : 'Select a song'}
+                </div>
+              </div>
+            </div>
+
+            {/* Middle: Controls & Progress */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <button
+                  onClick={() => {
+                    const idx = playlist.indexOf(nowPlaying);
+                    if (idx > 0) setNowPlaying(playlist[idx - 1]);
+                  }}
+                  style={{ background: 'transparent', color: '#b3b3b3', fontSize: '16px' }}
+                >
+                  ⏮️
+                </button>
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  style={{ backgroundColor: '#fff', color: '#000', width: '36px', height: '36px', borderRadius: '50%', fontSize: '14px', fontWeight: 'bold' }}
+                >
+                  {isPlaying ? '⏸️' : '▶️'}
+                </button>
+                <button
+                  onClick={() => {
+                    const idx = playlist.indexOf(nowPlaying);
+                    if (idx >= 0 && idx < playlist.length - 1) setNowPlaying(playlist[idx + 1]);
+                  }}
+                  style={{ background: 'transparent', color: '#b3b3b3', fontSize: '16px' }}
+                >
+                  ⏭️
+                </button>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#777' }}>
+                <span>1:24</span>
+                <div style={{ width: '220px', height: '4px', backgroundColor: '#3e3e3e', borderRadius: '2px', position: 'relative' }}>
+                  <div style={{ width: '38%', height: '100%', backgroundColor: '#1db954', borderRadius: '2px' }}></div>
+                </div>
+                <span>{nowPlaying ? getTrackMeta(nowPlaying).duration : '3:30'}</span>
+              </div>
+            </div>
+
+            {/* Right: Redux Store Info */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '11px', color: '#888' }}>Redux State:</span>
+              <span style={{ fontSize: '11px', backgroundColor: 'rgba(29, 185, 84, 0.2)', color: '#1db954', padding: '2px 8px', borderRadius: '4px', fontWeight: '700' }}>
+                🟢 {playlist.length} Tracks In Store
+              </span>
+            </div>
+          </footer>
+
+        </div>
+      );
+    }
+
+    // Render with Provider wrapping the App (Q4)
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
+      <Provider store={store}>
+        <SpotifyPlaylistApp />
+      </Provider>
+    );
+  </script>
+</body>
+</html>

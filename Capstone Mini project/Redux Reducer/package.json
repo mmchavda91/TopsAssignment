@@ -1,0 +1,22 @@
+{
+  "name": "redux-reducer-cart-wishlist",
+  "version": "1.0.0",
+  "description": "Redux Reducer Assignment: Cart, Wishlist, Redux Thunk Async Offers & Redux DevTools (Q1 to Q5)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "reducers",
+    "cartReducer",
+    "wishlistReducer",
+    "combineReducers",
+    "redux-thunk",
+    "redux-devtools"
+  ],
+  "author": "Mamta",
+  "license": "ISC"
+}
